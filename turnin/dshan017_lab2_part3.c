@@ -38,7 +38,7 @@ int main(void) {
 	if (!((tmpA & 0x08) >> 3)) {
 		cntavail = cntavail + 1 ;
 	}
-	if ((tmpA & 0x01) && ((tmpB & 0x02) >> 1) && ((tmpB & 0x04) >> 2) && ((tmpB & 0x08) >> 3)) {
+	if ((tmpA & 0x01) && ((tmpA & 0x02) >> 1) && ((tmpA & 0x04) >> 2) && ((tmpA & 0x08) >> 3)) {
 		cntavail = 0x80;
 	}
 	//3) Write Output	
