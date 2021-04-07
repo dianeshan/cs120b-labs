@@ -22,8 +22,7 @@ int main(void) {
     unsigned char tmpA = 0x00; //Temporary variable to hold the value of A
     unsigned char tmpB = 0x00; //Temporary variable to hold the value of B
     unsigned char tmpC = 0x00; //Temporary variable to hold the value of C
-    unsigned char result = 0x00;
-    short totalWeight = 0x0000; 
+    unsigned char result = 0x00; 
     /* Insert your solution below */
     while (1) {
 	// 1) Read input
@@ -31,15 +30,17 @@ int main(void) {
 	tmpB = PINB;
 	tmpC = PINC;
 	// 2) Perform computation 
+	result = (tmpA + tmpB + tmpC) >> 2; 
+	result = result & 0xFC;
 	if ((tmpA + tmpB + tmpC) > 0x8C) { // True if weight exceeds 140
-		result  = result | 0x01; //sets PD0 to 1 (00000001)
+		result  = result + 1; //sets PD0 to 1 (00000001)
 	}
 	if ((tmpA - tmpC) > 0x50 || (tmpC - tmpA) > 0x50) {
-		result = result | 0x02; //sets PD1 to 1 (00000010)
+		result = result + 2; //sets PD1 to 1 (00000010)
 	}
-	totalWeight = (tmpA + tmpB + tmpC) >> 2;   	
+	   	
 	//3) Write Output
-	PORTD = totalWeight | result;
+	PORTD = result;
     }
     return 0;
 }
