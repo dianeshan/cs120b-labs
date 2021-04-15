@@ -12,7 +12,7 @@
 #include "simAVRHeader.h"
 #endif
 
-enum BT_States { BT_SMStart, BT_s0, BT_s1 } BT_State;
+enum BT_States { BT_SMStart, BT_s0, BT_wait, BT_s1, BT_wait1 } BT_State;
 
 void TickFct_Button() {
     switch(BT_State) { //transitions
@@ -21,7 +21,7 @@ void TickFct_Button() {
 		break;
 	
 	case BT_s0:
-		if (PINA == 1) {
+		if (PINA & 0x01) {
 			BT_State = BT_s1;
 		}	
 		else {
@@ -30,16 +30,32 @@ void TickFct_Button() {
 		break;
 	
 	case BT_s1:
-		if (PINA == 1) {
-			BT_State = BT_s0;
+		if (PINA & 0x01) {
+			BT_State = BT_s1;
 		}
 		else {
-			BT_State = BT_s1;
+			BT_State = BT_wait1;
 		} 
 		break;
 
+	case BT_wait1:
+		if (PINA & 0x01) {
+			BT_State = BT_wait; 
+		}
+		else {
+			BT_State = BT_wait1;
+		}
+
+	case BT_wait:
+		if (PINA & 0x01) {
+			BT_State = BT_wait;
+		}
+		else {
+			BT_State = BT_s0;
+		}
+
 	default:
-		BT_State = BT_SMStart;
+		BT_State = BT_s0;
 		break;
     }
 
@@ -52,7 +68,14 @@ void TickFct_Button() {
 		PORTB = 0x02;
 		break; 
 
+	case BT_wait1:
+		PORTB = 0x02;
+
+	case BT_wait:
+		PORTB = 0x01;
+
 	default:
+		PORTB = 0x01;
 		break;
     }
 }
