@@ -39,13 +39,13 @@ tests = [ {'description': 'PINA: 0x04, 0x02, 0x00 => PORTB: 0x01, BT_state: BT_u
         {'inputs': [('PINA', 0x03)], 'iterations': 2}],
     'expected': [('PORTB',0x00)],
     },
-    {'description': 'PINA: 0x04, 0x00, 0x02, 0x04, 0x02 => PORTB: 0x00, BT_state: BT_locked',
+    {'description': 'PINA: 0x04, 0x00, 0x02, 0x04, 0x02 => PORTB: 0x00, BT_state: BT_unlocked',
     'steps': [ {'inputs': [('PINA',0x04)], 'iterations': 2 },
                 {'inputs': [('PINA', 0x00)], 'iterations': 2},
                 {'inputs': [('PINA',0x02)], 'iterations': 2 },
         {'inputs': [('PINA', 0x04)], 'iterations': 2},
         {'inputs': [('PINA', 0x02)], 'iterations': 2}],
-    'expected': [('PORTB',0x00)],
+    'expected': [('PORTB',0x01)],
     },
     ]
 

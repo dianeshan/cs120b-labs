@@ -15,6 +15,7 @@
 enum BT_States { BT_SMStart, BT_locked, BT_lhashp, BT_lhashr, BT_uhashp, BT_uhashr, BT_unlocked } BT_State;
 
 void TickFct_Button() {
+
     unsigned char tmpA = PINA & 0x01;
     unsigned char tmpB = PINA & 0x02;
     unsigned char tmpC = PINA & 0x04;
@@ -81,7 +82,7 @@ void TickFct_Button() {
                         BT_State = BT_uhashp;
                 }
                 else if (tmpA || tmpB) {
-                        BT_State = BT_locked;
+                        BT_State = BT_unlocked;
                 }
                 break;
 
@@ -90,10 +91,10 @@ void TickFct_Button() {
                         BT_State = BT_uhashr;
                 }
                 else if (tmpC || tmpA) {
-                        BT_State = BT_locked;
+                        BT_State = BT_unlocked;
                 }
                 else if (tmpB) {
-                        BT_State = BT_unlocked;
+                        BT_State = BT_locked;
                 }
                 break;		
 
