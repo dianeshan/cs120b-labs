@@ -29,7 +29,7 @@ tests = [ {'description': 'PINA: 0x01, 0x00, 0x03 => PORTC: 0x00, BT_state: BT_r
 		{'inputs': [('PINA', 0x01)], 'iterations': 2},
         {'inputs': [('PINA', 0x01)], 'iterations': 2},
 	{'inputs': [('PINA', 0x02)], 'iterations': 2}],
-    'expected': [('PORTC',0x03)],
+    'expected': [('PORTC',0x00)],
     },
     ]
 
