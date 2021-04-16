@@ -15,13 +15,15 @@
 enum BT_States { BT_SMStart, BT_s0, BT_wait, BT_s1, BT_wait1 } BT_State;
 
 void TickFct_Button() {
+    unsigned char tmpA = PINA & 0x01;
+
     switch(BT_State) { //transitions
 	case BT_SMStart: //initial transition
 		BT_State = BT_s0;
 		break;
 	
 	case BT_s0:
-		if (PINA & 0x01) {
+		if (tmpA) {
 			BT_State = BT_s1;
 		}	
 		else {
@@ -30,7 +32,7 @@ void TickFct_Button() {
 		break;
 	
 	case BT_s1:
-		if (PINA & 0x01) {
+		if (tmpA) {
 			BT_State = BT_s1;
 		}
 		else {
@@ -39,20 +41,22 @@ void TickFct_Button() {
 		break;
 
 	case BT_wait1:
-		if (PINA & 0x01) {
+		if (tmpA) {
 			BT_State = BT_wait; 
 		}
 		else {
 			BT_State = BT_wait1;
 		}
+		break;
 
 	case BT_wait:
-		if (PINA & 0x01) {
+		if (tmpA) {
 			BT_State = BT_wait;
 		}
 		else {
 			BT_State = BT_s0;
 		}
+		break;
 
 	default:
 		BT_State = BT_s0;
@@ -70,9 +74,11 @@ void TickFct_Button() {
 
 	case BT_wait1:
 		PORTB = 0x02;
+		break;
 
 	case BT_wait:
 		PORTB = 0x01;
+		break;	
 
 	default:
 		PORTB = 0x01;
