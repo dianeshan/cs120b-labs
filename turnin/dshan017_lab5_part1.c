@@ -31,7 +31,7 @@ int main(void) {
 	else if ((tmpA == 0x05) || (tmpA == 0x06)) {
 		fuellvl = 0x38;
 	}
-	else if ((tmpA == 0x06) || (tmpA == 0x08) || (tmpA == 0x09)) {
+	else if ((tmpA == 0x07) || (tmpA == 0x08) || (tmpA == 0x09)) {
 		fuellvl = 0x3C;
 	}
 	else if ((tmpA == 0x0A) || (tmpA == 0x0B) || (tmpA == 0x0C)) {

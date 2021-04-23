@@ -44,10 +44,10 @@ void TickFct_Button() {
 				BT_State = BT_s0;
 			}
 			else if (tmpA == 0x01) {
-				BT_State = BT_incp;
+				BT_State = BT_incr;
 			}
 			else if (tmpA == 0x02) {
-				BT_State = BT_decr;
+				BT_State = BT_decp;
 			}
 			else if (tmpA == 0x03) {
 				BT_State = BT_reset;
@@ -63,10 +63,10 @@ void TickFct_Button() {
 				BT_State = BT_s0;
 			}
 			else if (tmpA == 0x01) {
-				BT_State = BT_incp;
+				BT_State = BT_decr;
 			}
 			else if (tmpA == 0x02) {
-				BT_State = BT_decr;
+				BT_State = BT_incp;
 			}
 			else if (tmpA == 0x03) {
 				BT_State = BT_reset;
@@ -74,7 +74,12 @@ void TickFct_Button() {
 			break;
 
 		case BT_reset:
-			BT_State = BT_s0;
+			if (!tmpA) {
+				BT_State = BT_s0;
+			}
+			else {
+				BT_State = BT_reset;
+			}
 			break;
 
 		default:
