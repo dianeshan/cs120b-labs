@@ -16,7 +16,7 @@ enum BT_States { BT_SMStart, BT_s0, BT_s1, BT_s2, BT_s3, BT_s4, BT_s5, BT_reset}
 
 void TickFct_Button() {
 	unsigned char tmpA = ~PINA & 0x01;
-	unsigned char tmpC = PORTC;
+	unsigned char tmpB = PORTB;
 
 	switch (BT_State) { 
 		case BT_SMStart:
@@ -52,7 +52,7 @@ void TickFct_Button() {
 
 		case BT_s3:
 			if (tmpA == 0x01) {
-				BT_State = BT_s4
+				BT_State = BT_s4;
 			}
 			else {
 				BT_State = BT_s3;
