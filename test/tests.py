@@ -15,7 +15,7 @@
 # that they are not ran in isolation but in the order shown and the state of the device is not reset or 
 # altered in between executions (unless preconditions are used).
 tests = [ {'description': 'This test will run first.',
-    'steps': [ {'inputs': [('PINA',<val>)], 'iterations': 1 } ],
+    'steps': [ {'inputs': [('PINA', )], 'iterations': 1 } ],
     'expected': [('PORT',<val>)],
     },
     {'description': 'This test will run second.',
