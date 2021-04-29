@@ -25,7 +25,6 @@ int main(void) {
     DDRD = 0xFF; PORTD = 0x00;
 
     /* Insert your solution below */
-    PINA = ~PINA;
     ADC_init();
 
     while (1) {
