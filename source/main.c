@@ -1,7 +1,7 @@
 /*	Author: dshan017
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #8  Exercise #1
+ *	Assignment: Lab #8  Exercise #2
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -46,7 +46,7 @@ void PWM_off() {
 int main(void) {
     /* Insert DDR and PORT initializations */
     DDRA = 0x00; PORTA = 0xFF;
-    DDRB = 0x40; PORTB = 0x00;
+    DDRB = 0xFF; PORTB = 0x00;
 
     /* Insert your solution below */
     unsigned char tmpA = 0x00;
@@ -60,13 +60,13 @@ int main(void) {
 		tmpB = ~PINA & 0x02;
 		tmpC = ~PINA & 0x04;
 
-		if (tmpA) {
+		if (tmpA == 0x01) {
 			set_PWM(261.63);
 		}
-		else if (tmpB) {
+		else if (tmpB == 0x02) {
 			set_PWM(293.66);
 		}
-		else if (tmpC) {
+		else if (tmpC == 0x04) {
 			set_PWM(329.63);
 		}
 		else {
