@@ -6,6 +6,8 @@
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
+ *
+ *	Demo Link: 
  */
 #include <avr/io.h>
 #ifdef _SIMULATE_
@@ -41,6 +43,12 @@ void PWM_on() {
 void PWM_off() {
 	TCCR3A = 0x00;
 	TCCR3B = 0x00;
+}
+
+enum BT_States { BT_SMStart, BT_s0 } BT_State;
+
+void bt_tick() {
+
 }
 
 int main(void) {
