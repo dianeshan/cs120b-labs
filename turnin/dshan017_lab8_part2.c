@@ -45,37 +45,65 @@ void PWM_off() {
 	TCCR3B = 0x00;
 }
 
-enum BT_States{ BT_Start, BT_Off, BT_On, BT_Wait, BT_Inc, BT_Incr, BT_Dec, BT_Decr, BT_Offr } BT_State;
-
 double f[] = {261.63, 293.66, 329.64, 349.23, 392, 440, 493.88, 523.25 };
 unsigned char i = 4;
 
-void bt_tick() {
+enum DS_States { DS_Start, DS_Off, DS_On } DS_State;
+
+void ds_tick() {
     unsigned char tmpA = ~PINA & 0x01;
+
+    switch (DS_State) {
+        case DS_Start:
+            DS_State = DS_Off;
+            break;
+
+        case DS_Off:
+            if (tmpA == 0x01) {
+                DS_State = DS_On;
+            }
+            else {
+                DS_State = DS_Off;
+            }
+            break;
+
+        case DS_On:
+            if (tmpA == 0x01) {
+                DS_State = DS_Off;
+            }
+            else {
+                DS_State = DS_On;
+            }
+            break;
+    }
+
+    switch (DS_State) {
+        case DS_Start:
+            break;
+
+        case DS_Off:
+            PWM_off();
+            break;
+
+        case DS_On:
+            PWM_on();
+            break;
+        
+        default:
+            break;
+    }
+
+}
+
+enum BT_States{ BT_Start, BT_Wait, BT_Inc, BT_Incr, BT_Dec, BT_Decr } BT_State;
+
+void bt_tick() {
     unsigned char tmpB = ~PINA & 0x02;
     unsigned char tmpC = ~PINA & 0x04;
 
     switch (BT_State) {
         case BT_Start:
-            BT_State = BT_Off;
-            break;
-
-        case BT_Off:
-            if (tmpA == 0x01) {
-                BT_State = BT_On;
-            } 
-            else {
-                BT_State = BT_Off;
-            }
-            break;
-
-        case BT_On:
-            if (tmpA == 0x01) {
-                BT_State = BT_On;
-            }
-            else {
-                BT_State = BT_Wait;
-            }
+            BT_State = BT_Wait;
             break;
 
         case BT_Wait:
@@ -85,8 +113,8 @@ void bt_tick() {
             else if (tmpC == 0x04) {
                 BT_State = BT_Dec;
             }
-            else if (tmpA == 0x01) {
-                BT_State = BT_Offr;
+            else {
+                BT_State = BT_Wait;
             }
             break;
 
@@ -96,15 +124,6 @@ void bt_tick() {
 
         case BT_Dec:
             BT_State = BT_Decr;
-            break;
-
-        case BT_Offr:
-            if (tmpA == 0x01) {
-                BT_State = BT_Offr;
-            }
-            else {
-                BT_State = BT_Off;
-            }
             break;
 
         case BT_Incr:
@@ -133,15 +152,6 @@ void bt_tick() {
     switch (BT_State) {
         case BT_Start:
             break;
-        
-        case BT_Off:
-            PWM_off();
-            break;
-
-        case BT_On:
-            PWM_on();
-            i = 4;
-            break;
 
         case BT_Wait:
             break;
@@ -164,9 +174,6 @@ void bt_tick() {
         case BT_Decr:
             break;
 
-        case BT_Offr:
-            break;
-
         default:
             break;
     }
@@ -181,6 +188,7 @@ int main(void) {
     BT_State = BT_Start;
 
     while (1) {
+	ds_tick();
 	bt_tick();
 	set_PWM(f[i]);
     }
