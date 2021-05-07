@@ -45,10 +45,10 @@ void PWM_off() {
 	TCCR3B = 0x00;
 }
 
-double f[] = {261.63, 293.66, 329.64, 349.23, 392, 440, 493.88, 523.25 };
-unsigned char i = 4;
+double f[] = {261.63, 293.66, 329.63, 349.23, 392.0, 440.0, 493.88, 523.25 };
+unsigned char i = 0;
 
-enum DS_States { DS_Start, DS_Off, DS_On } DS_State;
+enum DS_States { DS_Start, DS_Off, DS_Offr, DS_On, DS_Onr } DS_State;
 
 void ds_tick() {
     unsigned char tmpA = ~PINA & 0x01;
@@ -67,14 +67,32 @@ void ds_tick() {
             }
             break;
 
+	case DS_Offr:
+	    if (tmpA == 0x01) {
+		DS_State = DS_Offr;
+	    }
+	    else {
+		DS_State = DS_Off;
+	    }
+	    break;
+
         case DS_On:
             if (tmpA == 0x01) {
-                DS_State = DS_Off;
-            }
-            else {
                 DS_State = DS_On;
             }
+            else {
+                DS_State = DS_Onr;
+            }
             break;
+
+	case DS_Onr:
+	    if (tmpA == 0x01) {
+		DS_State = DS_Offr;
+	    }
+	    else {
+		DS_State = DS_Onr;
+	    }
+	    break;
     }
 
     switch (DS_State) {
@@ -186,6 +204,8 @@ int main(void) {
 
     /* Insert your solution below */
     BT_State = BT_Start;
+
+    //PWM_off();
 
     while (1) {
 	ds_tick();
