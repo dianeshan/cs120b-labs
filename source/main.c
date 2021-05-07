@@ -52,24 +52,20 @@ int main(void) {
 
     /* Insert your solution below */
     unsigned char tmpA = 0x00;
-    unsigned char tmpB = 0x00;
-    unsigned char tmpC = 0x00;
 
     PWM_on();
 
     while (1) {
-		tmpA = ~PINA & 0x01;
-		tmpB = ~PINA & 0x02;
-		tmpC = ~PINA & 0x04;
+		tmpA = ~PINA & 0x07;
 
 		if (tmpA == 0x01) {
-			set_PWM(2616.3);
+			set_PWM(261.63);
 		}
-		else if (tmpB == 0x02) {
-			set_PWM(2936.6);
+		else if (tmpA == 0x02) {
+			set_PWM(293.66);
 		}
-		else if (tmpC == 0x04) {
-			set_PWM(3296.3);
+		else if (tmpA == 0x04) {
+			set_PWM(329.63);
 		}
 		else {
 			set_PWM(0);
