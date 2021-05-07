@@ -45,6 +45,12 @@ void PWM_off() {
 	TCCR3B = 0x00;
 }
 
+enum BT_States {  } BT_State;
+
+double seqOfNotes [] = { 293.66, 493.88, 440, 392, 293.66, 293.66, 293.66, 493.88, 440, 392, 329.63, 329.63 };
+unsigned char noteTime [] = {};
+unsigned char downTime [] = {};
+
 int main(void) {
     /* Insert DDR and PORT initializations */
     DDRA = 0x00; PORTA = 0xFF;
