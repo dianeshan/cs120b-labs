@@ -82,12 +82,16 @@ void TimerSet(unsigned long M){
 }
 
 double seqOfNotes [] = { 293.66, 493.88, 440, 392, 293.66, 293.66, 293.66, 493.88, 440, 392, 329.63};
+double noteTime [] = {300, 400, 300, 300, 500, 300, 300, 300, 300, 300, 400 };
 unsigned char i = 0;
+unsigned char playTime = 0;
 
 enum BT_States { BT_Start, BT_Off, BT_Play, BT_Down, BT_Waitr } BT_State;
 
+
 void bt_tick() {
     unsigned char tmpA = ~PINA & 0x01;
+    unsigned char tick = 150;
 
     switch (BT_State) {
         case BT_Start:
@@ -101,10 +105,11 @@ void bt_tick() {
             else {
                 BT_State = BT_Off;
             }
-	    break;        
+	    break;	    
 
         case BT_Play:
-            if (i >= 10) {
+	    playTime = playTime + tick; 
+            if (i >= 11) {
                 if (tmpA == 0x01) {
                     BT_State = BT_Waitr;
                 }
@@ -113,11 +118,18 @@ void bt_tick() {
                 }
             }
             else {
-                BT_State = BT_Down;
+		if (playTime >= noteTime[i]) {
+			playTime = 0;
+			BT_State = BT_Down;
+		}
+		else {
+			BT_State = BT_Play;
+		}
             }
 	    break;        
 
         case BT_Down:
+	    i++;
             BT_State = BT_Play;
             break;
 
@@ -142,11 +154,11 @@ void bt_tick() {
         case BT_Off:
             set_PWM(0);
             i = 0;
+	    playTime = 0;
             break;
 
         case BT_Play:
             set_PWM(seqOfNotes[i]);
-            i++;
             break;
 
         case BT_Down:
@@ -166,7 +178,7 @@ int main(void) {
     DDRA = 0x00; PORTA = 0xFF;
     DDRB = 0xFF; PORTB = 0x00;
 
-    TimerSet(250);
+    TimerSet(150);
     TimerOn();
     PWM_on();
 
@@ -177,6 +189,6 @@ int main(void) {
 	while (!TimerFlag);
 	TimerFlag = 0;
     }	
-    PWM_off();
+    //PWM_off();
     return 1;
 }
