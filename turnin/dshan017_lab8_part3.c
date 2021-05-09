@@ -10,6 +10,7 @@
  *	Demo Link:
  */
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
@@ -78,21 +79,15 @@ ISR(TIMER1_COMPA_vect) {
 void TimerSet(unsigned long M){
 	_avr_timer_M = M;
 	_avr_timer_cntcurr = _avr_timer_M;
-} 
+}
 
-double seqOfNotes [] = { 293.66, 493.88, 440, 392, 293.66, 293.66, 293.66, 493.88, 440, 392, 329.63, 329.63 };
-unsigned char noteTime [] = { 300, 300, 200, 300, 400, 200, 200, 300, 200, 200, 400, 200 };
-unsigned char downTime [] = { 100, 100, 100, 200, 300, 100, 100, 200, 100, 200, 300, 0 };
-
+double seqOfNotes [] = { 293.66, 493.88, 440, 392, 293.66, 293.66, 293.66, 493.88, 440, 392, 329.63};
 unsigned char i = 0;
 
-enum BT_States { BT_Start, BT_Off, BT_Note, BT_Down, BT_Buttonr } BT_State;
+enum BT_States { BT_Start, BT_Off, BT_Play, BT_Down, BT_Waitr } BT_State;
 
 void bt_tick() {
-    unsigned char tmpA = ~PINA & 0x01; //button input
-    unsgined char tick = 100; //100 ms
-    unsigned char playTime = 0; //note time array
-    unsigned char pauseTime = 0; //down time array
+    unsigned char tmpA = ~PINA & 0x01;
 
     switch (BT_State) {
         case BT_Start:
@@ -101,69 +96,32 @@ void bt_tick() {
 
         case BT_Off:
             if (tmpA == 0x01) {
-                BT_State = BT_Note;
+                BT_State = BT_Play;
             }
             else {
                 BT_State = BT_Off;
             }
-            break;
-
-        case BT_Note:
-            playTime = playTime + tick;
-            if (downTime == 0 || i = 11) {
+        
+        case BT_Play:
+            if (i >= 10) {
                 if (tmpA == 0x01) {
-                    BT_State = BT_Buttonr;
+                    BT_State = BT_Waitr;
                 }
                 else {
                     BT_State = BT_Off;
                 }
             }
-            else if (playTime < noteTime[i]) {
-                BT_State = BT_Note;
-            }
-            else if (playTime >= noteTime[i]) {
-                playTime = noteTime[i] + playTime;
+            else {
                 BT_State = BT_Down;
             }
-            else {
-                playTime = 0;
-                i++;
-                BT_State = BT_Note;
-            }
-            break;
-
+        
         case BT_Down:
-            pauseTime = pauseTime + tick;
-            if (pauseTime >= downTime[i]) {
-                if (i >= 12) {
-                    pauseTime = 0;
-                    if (tmpA == 0x01) {
-                        BT_State = BT_Buttonr;
-                    }
-                    else {
-                        BT_State = BT_Off;
-                    }
-                }
-                else {
-                    pauseTime = 0;
-                    i++;
-                    BT_State = BT_Note;
-                }
-            }
-            else {
-                BT_State = BT_Down;
-            }
+            BT_State = BT_Play;
             break;
-
-        case BT_Buttonr:
-            if (tmpA == 0x01) {
-                BT_State = BT_Buttonr;
-            }
-            else {
-                BT_State = BT_Off;
-            }
+        
+        default:
+            BT_State = BT_Start;
             break;
-
     }
 
     switch (BT_State) {
@@ -171,46 +129,42 @@ void bt_tick() {
             break;
 
         case BT_Off:
-            PWM_off();
+            set_PWM(0);
             i = 0;
-            playTime = 0;
-            pauseTime = 0;
             break;
-        
-        case BT_Note:
+
+        case BT_Play:
             set_PWM(seqOfNotes[i]);
+            i++;
             break;
 
         case BT_Down:
             set_PWM(0);
             break;
 
-        case BT_Buttonr:
+        case BT_Waitr:
             set_PWM(0);
             break;
- 
+
         default:
             break;
     }
 }
 
 int main(void) {
-    /* Insert DDR and PORT initializations */
     DDRA = 0x00; PORTA = 0xFF;
     DDRB = 0xFF; PORTB = 0x00;
 
-    /* Insert your solution below */
-
-    TimerSet(100);
+    TimerSet(250);
     TimerOn();
     PWM_on();
- 
+
     BT_State = BT_Start;
 
     while(1) {
     	bt_tick();
-    	while (!TimerFlag);
-    	TimerFlag = 0;
+	while (!TimerFlag);
+	TimerFlag = 0;
     }	
     PWM_off();
     return 1;
