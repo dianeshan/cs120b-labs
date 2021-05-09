@@ -101,7 +101,8 @@ void bt_tick() {
             else {
                 BT_State = BT_Off;
             }
-        
+	    break;        
+
         case BT_Play:
             if (i >= 10) {
                 if (tmpA == 0x01) {
@@ -114,10 +115,20 @@ void bt_tick() {
             else {
                 BT_State = BT_Down;
             }
-        
+	    break;        
+
         case BT_Down:
             BT_State = BT_Play;
             break;
+
+	case BT_Waitr:
+	    if (tmpA == 0x01) {
+		BT_State = BT_Waitr;
+	    }
+	    else {
+		BT_State = BT_Off;
+	    }
+	    break;
         
         default:
             BT_State = BT_Start;
