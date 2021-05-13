@@ -137,7 +137,7 @@ void bl_tick() {
 unsigned char combinedLEDs = 0x00;
 
 void cl_tick() {
-    combinedLEDs = threeLEDs + blinkingLED;
+    combinedLEDs = threeLEDs | blinkingLED;
 
     PORTB = combinedLEDs;
 }
