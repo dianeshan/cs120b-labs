@@ -124,7 +124,7 @@ void bl_tick() {
             break;
 
         case BL_On:
-            blinkingLED = 0x80;
+            blinkingLED = 0x08;
             break;
 
         case BL_Off:

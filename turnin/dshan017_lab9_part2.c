@@ -142,6 +142,7 @@ void bl_tick() {
             break;
 
         case BL_Off:
+	    bl_time = bl_time + period;
 	    if (bl_time < 1000) {
                 BL_State = BL_Off;
             }
@@ -161,7 +162,7 @@ void bl_tick() {
             break;
 
         case BL_On:
-            blinkingLED = 0x80;
+            blinkingLED = 0x08;
             break;
 
         case BL_Off:
