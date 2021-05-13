@@ -263,6 +263,9 @@ void ss_tick() {
     }
 }
 
+enum FrequencyAdjusterSM { FA_Start, FA_Up, FA_Down } FA_State;
+
+
 unsigned char combinedLEDs = 0x00;
 
 void cl_tick() {
