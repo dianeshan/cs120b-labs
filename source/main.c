@@ -50,7 +50,7 @@ void TimerSet(unsigned long M){
 
 unsigned char threeLEDs = 0x00;
 unsigned char blinkingLED = 0x00;
-unsigned char period = 100;
+unsigned char period = 10;
 unsigned char tl_time = 0;
 unsigned char bl_time = 0;
 
@@ -64,7 +64,7 @@ void tl_tick() {
 
         case TL_s0:
 	    tl_time = tl_time + period;
-            if (tl_time < 300) {
+            if (tl_time < 30) {
                 TL_State = TL_s0;
             }
             else {
@@ -75,7 +75,7 @@ void tl_tick() {
 
         case TL_s1:
 	    tl_time = tl_time + period;
-            if (tl_time < 300) {
+            if (tl_time < 30) {
                 TL_State = TL_s1;
             }
             else {
@@ -86,8 +86,8 @@ void tl_tick() {
 
         case TL_s2:
 	    tl_time = tl_time + period;
-            if (tl_time < 300) {
-                TL_State = s2;
+            if (tl_time < 30) {
+                TL_State = TL_s2;
             }
             else {
                 tl_time = 0;
@@ -130,7 +130,7 @@ void bl_tick() {
 
         case BL_On:
 	    bl_time = bl_time + period;
-            if (bl_time < 1000) {
+            if (bl_time < 100) {
                 BL_State = BL_On;
             }
             else {
@@ -140,7 +140,7 @@ void bl_tick() {
             break;
 
         case BL_Off:
-	    if (bl_time < 1000) {
+	    if (bl_time < 100) {
                 BL_State = BL_Off;
             }
             else {
@@ -184,7 +184,7 @@ int main(void) {
     //DDRA = 0x00; PORTA = 0xFF;
     DDRB = 0xFF; PORTB = 0x00;
 
-    TimerSet(100);
+    TimerSet(10);
     TimerOn();
 
     /* Insert your solution below */

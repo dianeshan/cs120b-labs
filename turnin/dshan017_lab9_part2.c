@@ -6,6 +6,8 @@
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
+ *
+ *	Demo Link:
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -87,7 +89,7 @@ void tl_tick() {
         case TL_s2:
 	    tl_time = tl_time + period;
             if (tl_time < 300) {
-                TL_State = s2;
+                TL_State = TL_s2;
             }
             else {
                 tl_time = 0;
