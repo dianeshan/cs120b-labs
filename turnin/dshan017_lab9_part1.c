@@ -64,7 +64,7 @@ void tl_tick() {
             break;
 
         case TL_s1:
-            TL_State = TL_s1;
+            TL_State = TL_s2;
             break;
 
         case TL_s2:
@@ -144,10 +144,10 @@ void cl_tick() {
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-    DDRA = 0x00; PORTA = 0xFF;
+   // DDRA = 0x00; PORTA = 0xFF;
     DDRB = 0xFF; PORTB = 0x00;
 
-    TimerSet(100);
+    TimerSet(1000);
     TimerOn();
 
     /* Insert your solution below */
