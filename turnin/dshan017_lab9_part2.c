@@ -53,8 +53,8 @@ void TimerSet(unsigned long M){
 unsigned char threeLEDs = 0x00;
 unsigned char blinkingLED = 0x00;
 unsigned char period = 100;
-unsigned char tl_time = 0;
-unsigned char bl_time = 0;
+unsigned long tl_time = 0;
+unsigned long bl_time = 0;
 
 enum ThreeLEDsSM { TL_Start, TL_s0, TL_s1, TL_s2  } TL_State;
 
