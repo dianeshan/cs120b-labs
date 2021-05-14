@@ -57,6 +57,7 @@ unsigned char period = 1;
 unsigned long tl_time = 0;
 unsigned long bl_time = 0;
 unsigned long ss_time = 0;
+unsigned long fa_time = 0;
 unsigned long frequency = 5;
 
 enum ThreeLEDsSM { TL_Start, TL_s0, TL_s1, TL_s2  } TL_State;
@@ -275,31 +276,38 @@ void fa_tick() {
             break;
 
         case FA_Wait:
-            if (tmpB == 0x01) {
-                FA_State = FA_Up;
-            }
-            else if (tmpB == 0x02) {
-                FA_State = FA_Down;
-            }
-            else {
-                FA_State = FA_Wait;
-            }
-            break;
-
-        case FA_Up:
-            if (tmpB == 0x01) {
-                FA_State = FA_Up;
-            }
-            else {
-                FA_State = FA_Wait;
+	    fa_time = fa_time + period;
+	    if (fa_time < 100) {
+		FA_State = FA_Wait;
+	    }
+	    else {
+		if (tmpB == 0x01) {
+                	FA_State = FA_Up;
+            	}
+		else if (tmpB == 0x02) {
+			FA_State = FA_Down;
+		}
             }
             break;
 
-        case FA_Down:
-            if (tmpB == 0x02) {
+       case FA_Up:
+	    fa_time = fa_time + period;
+	    if (fa_time < 100) {
+            	FA_State = FA_Up;
+	    }
+	    else {
+		fa_time = 0;
+		FA_State = FA_Wait;
+	    }
+            break;
+
+       case FA_Down:
+	    fa_time = fa_time + period;
+            if (fa_time < 100) {
                 FA_State = FA_Down;
             }
             else {
+		fa_time = 0;
                 FA_State = FA_Wait;
             }
             break;
@@ -317,11 +325,11 @@ void fa_tick() {
             break;
 
         case FA_Up:
-            frequency++;
+            frequency = frequency + 1;
             break;
 
         case FA_Down:
-            frequency--;
+            frequency = frequency - 1;
             break;
 
         default:
