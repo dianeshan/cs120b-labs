@@ -1,7 +1,7 @@
 /*	Author: dshan017
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #10  Exercise #2
+ *	Assignment: Lab #10  Exercise #3
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -10,6 +10,7 @@
  *	Demo Link: 
  */
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include "bit.h"
 #include "timer.h"
 #include "keypad.h"
@@ -23,6 +24,33 @@ typedef struct _task {
     unsigned long int elapsedTime;
     int (*TickFct)(int);
 } task;
+
+void set_PWM(double frequency){
+	static double current_frequency;
+
+	if(frequency != current_frequency){
+		if(!frequency){TCCR3B &= 0x08;}
+		else{TCCR3B |= 0x03;}
+
+		if(frequency < 0.954){OCR3A = 0xFFFF;}
+		else if (frequency > 31250) {OCR3A = 0x0000;}
+		else {OCR3A = (short) (8000000 / (128 * frequency)) - 1;}
+
+		TCNT3 = 0;
+		current_frequency = frequency;
+	}
+}
+
+void PWM_on(){
+	TCCR3A = (1 << COM3A0);
+	TCCR3B = (1 << WGM32) | (1 << CS31) | (1 << CS30);
+	set_PWM(0);
+}
+
+void PWM_off(){
+	TCCR3A = 0x00;
+	TCCR3B = 0x00;
+}
 
 enum keypad_State { keypad_wait, keypad_press, keypad_release, keypad_unlock };
 char code[] = {'#', '1', '2', '3', '4', '5'};
@@ -138,23 +166,95 @@ int lockSMTick(int state) {
 	return state;
 }
 
-enum doorbell_States { doorbell_wait, doorbell_press, doorbell_play, doorbell_release };
+double seqOfNotes [] = { 392, 493.88, 440, 392, 293.66, 293.66, 440};
+double noteTime [] = {400, 400, 200, 600, 400, 200, 400 };
+unsigned char j = 0;
+unsigned char playTime = 0;
+
+enum doorbell_States { doorbell_start, doorbell_off, doorbell_play, doorbell_down, doorbell_waitr };
 
 int doorbellSMTick(int state) {
 	unsigned char tmpA = ~PINA 0x80;
+	unsigned char tick = 200;
 
 	switch (state) {
-		case doorbell_wait:
+		case doorbell_start:
+			state = doorbell_off;
+			break;
+
+		case doorbell_off
 			if (tmpA) {
-				state = doorbell_press;
+				state = doorbell_play;
 			}
 			else {
-				state = doorbell_wait;
+				state = doorbell_start;
 			}
 			break;
 
-		case doorbell_press:
+		case doorbell_play:
+			playTime = playTime + tick;
+			if (j >= 7) {
+				if (tmpA) {
+					state = doorbell_waitr;
+				}
+				else {
+					state = doorbell_off;
+				}
+			}
+			else {
+				if (playTime >= noteTime[j]) {
+					playTime = 0;
+					state = doorbell_down;
+				}
+				else {
+					state = doorbell_play;
+				}
+			}
+			break;
 			
+		case doorbell_down:
+			j++;
+			state = doorbell_play;
+			break;
+
+		case doorbell_waitr:
+			if (tmpA) {
+				state = doorbell_waitr;
+			}
+			else {
+				state = doorbell_off;
+			}
+			break;
+
+		default:
+			state = doorbell_start;
+			break;
+	}
+
+	switch (state) {
+		case doorbell_start:
+			break;
+	
+		case doorbell_off:
+			set_PWM(0);
+			j = 0;
+			playTime = 0;
+			break;
+
+		case doorbell_play:
+			set_PWM(seqOfNotes[j]);
+			break;
+
+		case doorbell_down:
+			set_PWM(0);
+			break;
+
+		case doorbell_waitr:
+			set_PWM(0);
+			break;
+
+		default:
+			break;
 	}
 }
 
@@ -207,6 +307,7 @@ int main(void) {
 
     TimerSet(GCD);
     TimerOn();
+    PWM_on();
 
     while (1) {
 	for (i = 0; i < numTasks; i++) {
@@ -219,5 +320,6 @@ int main(void) {
         while(!TimerFlag);
         TimerFlag = 0;
     }
+    PWM_off();
     return 0;
 }
