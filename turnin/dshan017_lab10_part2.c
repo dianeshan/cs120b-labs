@@ -24,8 +24,8 @@ typedef struct _task {
     int (*TickFct)(int);
 } task;
 
-enum keypad_States { keypad_wait, keypad_press, keypad_release, keypad_unlock };
-unsigned char code[] = {'#', '1', '2', '3', '4', '5'};
+enum keypad_State { keypad_wait, keypad_press, keypad_release, keypad_unlock };
+char code[] = {'#', '1', '2', '3', '4', '5'};
 unsigned char i = 0;
 
 int keypadSMTick(int state) {
@@ -152,7 +152,7 @@ unsigned long int findGCD( unsigned long int a, unsigned long int b) {
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-    DDRB = 0x7F; PORTB = 0x00;
+    DDRB = 0x7F; PORTB = 0x80;
     DDRC = 0xF0; PORTC = 0x0F;
     /* Insert your solution below */
 

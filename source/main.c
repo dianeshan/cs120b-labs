@@ -1,11 +1,13 @@
 /*	Author: dshan017
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #10  Exercise #1
+ *	Assignment: Lab #10  Exercise #2
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
+ *
+ *	Demo Link: 
  */
 #include <avr/io.h>
 #include "bit.h"
@@ -22,11 +24,13 @@ typedef struct _task {
     int (*TickFct)(int);
 } task;
 
-enum keypad_States { keypad_wait, keypad_press, keypad_release };
+enum keypad_State { keypad_wait, keypad_press, keypad_release, keypad_unlock };
+char code[] = {'#', '1', '2', '3', '4', '5'};
+unsigned char i = 0;
 
 int keypadSMTick(int state) {
-	unsigned char x = GetKeypadKey();
-	
+	unsigned char x = GetKeypadKey();	
+
 	switch (state) {
 		case keypad_wait:
 			if (x == '\0') {
@@ -37,17 +41,34 @@ int keypadSMTick(int state) {
 			}	
 			break;
 
-		case keypad_press:
-			state = keypad_release;
+		case keypad_press: 
+			if (x == code[i]) {
+				if (i == 5) {
+					state = keypad_unlock;
+				}
+				else {
+					state = keypad_release;
+				}
+			}
+			else {
+				i = 0;
+				state = keypad_wait;
+			}
 			break;
 
 		case keypad_release:
 			if (x == '\0') {
+				++i;
 				state = keypad_wait;
 			}
 			else {
 				state = keypad_release;
 			}
+			break;
+
+		case keypad_unlock:
+			i = 0;
+			state = keypad_wait;
 			break;
 
 		default:
@@ -57,20 +78,62 @@ int keypadSMTick(int state) {
 
 	switch (state) {
 		case keypad_wait:
-			PORTB = 0x00;
 			break;
 
 		case keypad_press:
-			PORTB = 0x80;
 			break;
 
 		case keypad_release:
-			PORTB = 0x80;
+			break;
+
+		case keypad_unlock:
+			PORTB = 0x01;
 			break;
 
 		default:
 			break;
 	}
+
+	return state;
+}
+
+enum lock_States { lock_wait, lock_lock };
+
+int lockSMTick(int state) {
+	unsigned char tmpB = ~PINB & 0x80;	
+
+	switch (state) {
+		case lock_wait:
+			if (tmpB) {
+				state = lock_lock;
+			}
+			else {
+				state = lock_wait;
+			}
+			break;
+
+		case lock_lock:
+			if (tmpB) {
+				state = lock_lock;
+			}
+			else {
+				state = lock_wait;
+			}
+			break;
+
+		default:
+			state = lock_wait;
+			break;
+	}
+
+	switch (state) {
+		case lock_wait:
+			break;
+	
+		case lock_lock:
+			PORTB = 0x00;
+			break;
+	}		
 
 	return state;
 }
@@ -89,12 +152,12 @@ unsigned long int findGCD( unsigned long int a, unsigned long int b) {
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-    DDRB = 0xFF; PORTB = 0x00;
+    DDRB = 0x7F; PORTB = 0x80;
     DDRC = 0xF0; PORTC = 0x0F;
     /* Insert your solution below */
 
-    static task task1;
-    task *tasks[] = { &task1 };
+    static task task1, task2;
+    task *tasks[] = { &task1, &task2 };
     const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
     
     const char start = -1;
@@ -103,6 +166,11 @@ int main(void) {
     task1.period = 100;
     task1.elapsedTime = task1.period;
     task1.TickFct = &keypadSMTick;    
+
+    task2.state = start;
+    task2.period = 100;
+    task2.elapsedTime = task2.period;
+    task2.TickFct = &lockSMTick;
 
     unsigned short i;
 
