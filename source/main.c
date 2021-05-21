@@ -138,6 +138,26 @@ int lockSMTick(int state) {
 	return state;
 }
 
+enum doorbell_States { doorbell_wait, doorbell_press, doorbell_play, doorbell_release };
+
+int doorbellSMTick(int state) {
+	unsigned char tmpA = ~PINA 0x80;
+
+	switch (state) {
+		case doorbell_wait:
+			if (tmpA) {
+				state = doorbell_press;
+			}
+			else {
+				state = doorbell_wait;
+			}
+			break;
+
+		case doorbell_press:
+			
+	}
+}
+
 unsigned long int findGCD( unsigned long int a, unsigned long int b) {
     unsigned long int c;
     while(1) {
@@ -152,12 +172,13 @@ unsigned long int findGCD( unsigned long int a, unsigned long int b) {
 
 int main(void) {
     /* Insert DDR and PORT initializations */
+    DDRA = 0x00; PORTA = 0xFF;
     DDRB = 0x7F; PORTB = 0x80;
     DDRC = 0xF0; PORTC = 0x0F;
     /* Insert your solution below */
 
-    static task task1, task2;
-    task *tasks[] = { &task1, &task2 };
+    static task task1, task2, task3;
+    task *tasks[] = { &task1, &task2, &task3 };
     const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
     
     const char start = -1;
@@ -171,6 +192,11 @@ int main(void) {
     task2.period = 100;
     task2.elapsedTime = task2.period;
     task2.TickFct = &lockSMTick;
+
+    task3.state = start;
+    task3.period = 200;
+    task3.elapsedTime = task3.period;
+    task3.TickFct = &doorbellSMTick;
 
     unsigned short i;
 
