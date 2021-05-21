@@ -174,15 +174,15 @@ unsigned char playTime = 0;
 enum doorbell_States { doorbell_start, doorbell_off, doorbell_play, doorbell_down, doorbell_waitr };
 
 int doorbellSMTick(int state) {
-	unsigned char tmpA = ~PINA & 0x80;
-	unsigned char tick = 100;
+	unsigned char tmpA = ~PINA 0x80;
+	unsigned char tick = 200;
 
 	switch (state) {
 		case doorbell_start:
 			state = doorbell_off;
 			break;
 
-		case doorbell_off:
+		case doorbell_off
 			if (tmpA) {
 				state = doorbell_play;
 			}
@@ -227,7 +227,7 @@ int doorbellSMTick(int state) {
 			break;
 
 		default:
-			state = doorbell_off;
+			state = doorbell_start;
 			break;
 	}
 
@@ -256,8 +256,6 @@ int doorbellSMTick(int state) {
 		default:
 			break;
 	}
-
-	return state;
 }
 
 unsigned long int findGCD( unsigned long int a, unsigned long int b) {
