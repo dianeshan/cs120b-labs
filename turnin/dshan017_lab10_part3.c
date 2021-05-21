@@ -166,34 +166,30 @@ int lockSMTick(int state) {
 	return state;
 }
 
-double seqOfNotes [] = { 392, 493.88, 440, 392, 293.66, 293.66, 440};
-double noteTime [] = {400, 400, 200, 600, 400, 200, 400 };
+double melody [] = { 493.88, 392, 440, 392, 293.66, 293.66, 440};
 unsigned char j = 0;
-unsigned char playTime = 0;
 
 enum doorbell_States { doorbell_start, doorbell_off, doorbell_play, doorbell_down, doorbell_waitr };
 
 int doorbellSMTick(int state) {
-	unsigned char tmpA = ~PINA 0x80;
-	unsigned char tick = 200;
+	unsigned char tmpA = ~PINA & 0x80;
 
 	switch (state) {
 		case doorbell_start:
 			state = doorbell_off;
 			break;
 
-		case doorbell_off
+		case doorbell_off:
 			if (tmpA) {
 				state = doorbell_play;
 			}
 			else {
-				state = doorbell_start;
+				state = doorbell_off;
 			}
 			break;
 
 		case doorbell_play:
-			playTime = playTime + tick;
-			if (j >= 7) {
+			if (j >= 6) {
 				if (tmpA) {
 					state = doorbell_waitr;
 				}
@@ -202,13 +198,7 @@ int doorbellSMTick(int state) {
 				}
 			}
 			else {
-				if (playTime >= noteTime[j]) {
-					playTime = 0;
-					state = doorbell_down;
-				}
-				else {
-					state = doorbell_play;
-				}
+				state = doorbell_down;
 			}
 			break;
 			
@@ -227,7 +217,7 @@ int doorbellSMTick(int state) {
 			break;
 
 		default:
-			state = doorbell_start;
+			state = doorbell_off;
 			break;
 	}
 
@@ -238,11 +228,10 @@ int doorbellSMTick(int state) {
 		case doorbell_off:
 			set_PWM(0);
 			j = 0;
-			playTime = 0;
 			break;
 
 		case doorbell_play:
-			set_PWM(seqOfNotes[j]);
+			set_PWM(melody[j]);
 			break;
 
 		case doorbell_down:
@@ -256,6 +245,8 @@ int doorbellSMTick(int state) {
 		default:
 			break;
 	}
+
+	return state;
 }
 
 unsigned long int findGCD( unsigned long int a, unsigned long int b) {
@@ -284,12 +275,12 @@ int main(void) {
     const char start = -1;
 
     task1.state = start;
-    task1.period = 100;
+    task1.period = 10;
     task1.elapsedTime = task1.period;
     task1.TickFct = &keypadSMTick;    
 
     task2.state = start;
-    task2.period = 100;
+    task2.period = 10;
     task2.elapsedTime = task2.period;
     task2.TickFct = &lockSMTick;
 
