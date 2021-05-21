@@ -93,8 +93,8 @@ int main(void) {
     DDRC = 0xF0; PORTC = 0x0F;
     /* Insert your solution below */
 
-    static _task task1;
-    _task *tasks[] = { &task1 };
+    static task task1;
+    task *tasks[] = { &task1 };
     const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
     
     const char start = -1;

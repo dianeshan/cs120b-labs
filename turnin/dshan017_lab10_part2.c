@@ -6,6 +6,8 @@
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
+ *
+ *	Demo Link: 
  */
 #include <avr/io.h>
 #include "bit.h"
@@ -168,7 +170,7 @@ int main(void) {
     task2.state = start;
     task2.period = 100;
     task2.elapsedTime = task2.period;
-    task2.TickFct = $lockSMTick;
+    task2.TickFct = &lockSMTick;
 
     unsigned short i;
 
