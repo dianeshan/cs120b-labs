@@ -282,7 +282,7 @@ int changecomboSMTick (int state) {
         case changecombo_insert:
 	    x = GetKeypadKey();
 	    PORTB = 0x00;
-            if (k == 5) {
+            if (k == 6) {
                 if (x == '#') { //designated end of combo
                     state = changecombo_setcode;
                 }
@@ -331,8 +331,8 @@ int changecomboSMTick (int state) {
             break;
         
         case changecombo_setcode:
-            for (int i = 0; i <= 4; i++) {
-                code[i + 1] = newcode[i];
+            for (int i = 0; i <= 5; i++) {
+                code[i] = newcode[i];
             }
             break;
     }
