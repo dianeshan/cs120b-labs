@@ -1,7 +1,7 @@
 /*	Author: dshan017
  *  Partner(s) Name: 
  *	Lab Section:
- *	Assignment: Lab #10  Exercise #3
+ *	Assignment: Lab #10  Exercise #4
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -249,6 +249,13 @@ int doorbellSMTick(int state) {
 	return state;
 }
 
+enum changecombo_States { changecombo_ };
+char tmp[];
+
+int changecomboSMTick (int state) {
+	
+}
+
 unsigned long int findGCD( unsigned long int a, unsigned long int b) {
     unsigned long int c;
     while(1) {
@@ -268,8 +275,8 @@ int main(void) {
     DDRC = 0xF0; PORTC = 0x0F;
     /* Insert your solution below */
 
-    static task task1, task2, task3;
-    task *tasks[] = { &task1, &task2, &task3 };
+    static task task1, task2, task3, task4;
+    task *tasks[] = { &task1, &task2, &task3, &task4 };
     const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
     
     const char start = -1;
@@ -288,6 +295,11 @@ int main(void) {
     task3.period = 200;
     task3.elapsedTime = task3.period;
     task3.TickFct = &doorbellSMTick;
+
+    task4.state = start;
+    task4.period = 100;
+    task4.elapsedTime = task4.period;
+    task4.TickFct = &changecomboSMTick;
 
     unsigned short i;
 
