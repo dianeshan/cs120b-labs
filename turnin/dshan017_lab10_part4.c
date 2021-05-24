@@ -249,7 +249,7 @@ int doorbellSMTick(int state) {
 	return state;
 }
 
-enum changecombo_States { changecombo_ };
+enum changecombo_States { changecombo_wait, changecombo_release, changecombo_insert, changecombo_insertrelease, changecombo_setcode };
 char newcode[5];
 unsigned char k = 0;
 
@@ -268,6 +268,7 @@ int changecomboSMTick (int state) {
             break;
 
         case changecombo_release:
+	    PORTB = 0x02;
             if (x == '*') {
                 state = changecombo_release;
             }
@@ -277,9 +278,11 @@ int changecomboSMTick (int state) {
             break;
 
         case changecombo_insert:
-            if (k == 5) {
+	    PORTB = 0x00;
+            if (k == 6) {
                 if (x == '#') { //designated end of combo
-                    state = changecombo_setcode;
+		    PORTB = 0x04;
+		    state = changecombo_setcode;
                 }
                 else {
                     state = changecombo_insert;
@@ -292,16 +295,17 @@ int changecomboSMTick (int state) {
             break;
 
         case changecombo_insertrelease:
-            if (x == '\0') {
-                k++;
-                state = changecombo_insert;
+            if ((x == '\0') || (newcode[k - 1] == x)) {
+                state = changecombo_insertrelease;
             }
             else {
-                state = keypad_insertrelease;
+		k++;
+                state = changecombo_insert;
             }
             break;
 
         case changecombo_setcode:
+	    PORTB = 0x00;
             state = changecombo_wait;
             break;
 
@@ -325,8 +329,8 @@ int changecomboSMTick (int state) {
             break;
         
         case changecombo_setcode:
-            for (int i = 1; i <= 5; i++) {
-                code[i] = newcode[i - 1];
+            for (int i = 0; i <= 5; i++) {
+                code[i] = newcode[i];
             }
             break;
     }

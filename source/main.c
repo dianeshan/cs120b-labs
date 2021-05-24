@@ -259,7 +259,6 @@ int changecomboSMTick (int state) {
 
     switch (state) {
         case changecombo_wait:
-	    x = GetKeypadKey();
             if (tmpB && (x == '*')) {
                 state = changecombo_release;
             }
@@ -269,7 +268,6 @@ int changecomboSMTick (int state) {
             break;
 
         case changecombo_release:
-	    x = GetKeypadKey();
 	    PORTB = 0x02;
             if (x == '*') {
                 state = changecombo_release;
@@ -280,11 +278,11 @@ int changecomboSMTick (int state) {
             break;
 
         case changecombo_insert:
-	    x = GetKeypadKey();
 	    PORTB = 0x00;
             if (k == 6) {
                 if (x == '#') { //designated end of combo
-                    state = changecombo_setcode;
+		    PORTB = 0x04;
+		    state = changecombo_setcode;
                 }
                 else {
                     state = changecombo_insert;
@@ -297,7 +295,6 @@ int changecomboSMTick (int state) {
             break;
 
         case changecombo_insertrelease:
-	    x = GetKeypadKey();
             if ((x == '\0') || (newcode[k - 1] == x)) {
                 state = changecombo_insertrelease;
             }
@@ -308,6 +305,7 @@ int changecomboSMTick (int state) {
             break;
 
         case changecombo_setcode:
+	    PORTB = 0x00;
             state = changecombo_wait;
             break;
 
