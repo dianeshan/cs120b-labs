@@ -180,7 +180,7 @@ int move_tick(int state)
         break;
 
     case move_start:
-	state = move_norm:
+	state = move_norm;
 	break;
 
     case move_norm:
