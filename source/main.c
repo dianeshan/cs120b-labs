@@ -20,25 +20,26 @@ typedef struct _task {
     unsigned long int elapsedTime;
     int (*TickFct)(int);
 } task;
-
-unsigned char level1 = [ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0 ];
-unsigned char level2 = [ 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
-unsigned char level3 = [ 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
-unsigned char level4 = [ 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 1, 0, 1, 0, 0, 2, 0, 0, 2, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
-unsigned char level5 = [ 0, 0, 1, 0, 2, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 1, 0, 0, 0 ];
-unsigned char level6 = [ 0, 0, 2, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 2, 0, 2, 0, 0, 1, 0, 0, 0, 2, 0, 2, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 2, 0, 0, 1, 0, 0, 0 ];
-unsigned char level7 = [ 0, 0, 2, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 1, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 2, 0, 2, 0, 1, 0, 0, 1, 0, 2, 0, 2, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 2, 0, 0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 0 ];
+/*
+unsigned short level1 = [ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0 ];
+unsigned short level2 = [ 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
+unsigned short level3 = [ 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
+unsigned short level4 = [ 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 1, 0, 1, 0, 0, 2, 0, 0, 2, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
+unsigned short level5 = [ 0, 0, 1, 0, 2, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 1, 0, 0, 0 ];
+unsigned short level6 = [ 0, 0, 2, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 2, 0, 2, 0, 0, 1, 0, 0, 0, 2, 0, 2, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 2, 0, 0, 1, 0, 0, 0 ];
+unsigned short level7 = [ 0, 0, 2, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 1, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 2, 0, 2, 0, 1, 0, 0, 1, 0, 2, 0, 2, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 2, 0, 0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 1, 0, 0, 0 ];
+*/
 
 unsigned short i = 0;
 unsigned char pattern = 0;
 unsigned char row = 0;
-unsigned char begin = ~PINA & 0x20;
-unsigned char multip = ~PINA & 0x80;
-unsigned char singlep = ~PINA & 0x40;
-unsigned char jump = ~PINA & 0x01;
-unsigned char duck = ~PINA & 0x02;
-unsigned char jump2 = ~PINA & 0x04;
-unsigned char duck2 = ~PINA & 0x08;
+//unsigned char begin = ~PINA & 0x20;
+//unsigned char multip = ~PINA & 0x80;
+//unsigned char singlep = ~PINA & 0x40;
+//unsigned char jump = ~PINA & 0x01;
+//unsigned char duck = ~PINA & 0x02;
+//unsigned char jump2 = ~PINA & 0x04;
+//unsigned char duck2 = ~PINA & 0x08;
 
 enum run_states { run_wait, run_lvl1, run_lvl2, run_lvl3, run_lvl4, run_lvl5, run_lvl6, run_lvl7, run_fail, run_congrats, run_win };
 
@@ -159,6 +160,11 @@ enum move_states { move_wait, move_norm, move_jump, move_duck };
 
 int move_tick(int state)
 {
+    unsigned char begin = ~PINA & 0x20;
+    unsigned char jump = ~PINA & 0x01;
+    unsigned char duck = ~PINA & 0x02;
+    unsigned char jump2 = ~PINA & 0x04;
+    unsigned char duck2 = ~PINA & 0x08;
 
     switch (state)
     {
@@ -274,6 +280,16 @@ int move_tick(int state)
     return state;
 }
 
+unsigned long int findGCD (unsigned long int a, unsigned long int b) {
+	unsigned long int c;
+	while(1) {
+		c = a%b;
+		if (c == 0) { return b; }
+		a = b;
+		b = c;
+	}
+	return 0;
+}
 
 int main(void) {
     /* Insert DDR and PORT initializations */
