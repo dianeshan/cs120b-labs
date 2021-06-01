@@ -31,8 +31,8 @@ unsigned short level7 = [ 0, 0, 2, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 2, 0, 0, 
 */
 
 unsigned short i = 0;
-unsigned char pattern = 0;
-unsigned char row = 0;
+//unsigned char runpattern = 0;
+//unsigned char runrow = 0;
 //unsigned char begin = ~PINA & 0x20;
 //unsigned char multip = ~PINA & 0x80;
 //unsigned char singlep = ~PINA & 0x40;
@@ -46,6 +46,10 @@ enum run_states { run_wait, run_lvl1, run_lvl2, run_lvl3, run_lvl4, run_lvl5, ru
 //state machine for displaying hi welcome screen
 enum open_states { open_wait, open_display1, open_display2, open_display3, open_display4, open_off };
 //period of 1ms
+
+unsigned char openpattern = 0x00;
+unsigned char openrow = 0x00;
+
 int open_tick(int state) {
     unsigned char begin = ~PINA & 0x20;
     unsigned char game = ~PINA & 0x10;
@@ -118,45 +122,46 @@ int open_tick(int state) {
 
     switch (state) {
         case open_wait:
-            //pattern = 0xFF; 
-            //row = 0x11; //flat row top and bottom
+            openpattern = 0xFF; 
+            openrow = 0x0E; //flat row top and bottom
             break;
 
         case open_display1:
-            pattern = 0x40;
-            row = 0x0E;
+            openpattern = 0x40;
+            openrow = 0x11;
             break;
 
         case open_display2:
-            pattern = 0x20;
-            row = 0x04;
+            openpattern = 0x20;
+            openrow = 0x1B;
             break;
 
         case open_display3:
-            pattern = 0x10;
-            row = 0x0E;
+            openpattern = 0x10;
+            openrow = 0x11;
             break;
 
         case open_display4:
-            pattern = 0x04;
-            row = 0x0E;
+            openpattern = 0x04;
+            openrow = 0x11;
             break;
 
         case open_off:
-            pattern = 0x00;
-            row = 0x00;
+            openpattern = 0x00;
+            openrow = 0x00;
             break;
 
         default:
             break;
     }
 
-    PORTC = pattern;
-    PORTD = row;
     return state;
 }
 
 enum move_states { move_wait, move_start, move_norm, move_jump, move_duck };
+
+unsigned char movepattern = 0x00;
+unsigned char moverow = 0x00;
 
 int move_tick(int state)
 {
@@ -239,42 +244,42 @@ int move_tick(int state)
 	break;
     
     case move_start:
-        pattern = 0x80;
+        movepattern = 0x80;
         break;
 
     case move_norm:
-	row = 0x18;
-        if (pattern == 0x01)
+	moverow = 0x18;
+        if (movepattern == 0x01)
         { //reset to beginning of matrix
-            pattern = 0x80;
+            movepattern = 0x80;
         }
         else
         {
-            pattern >>= 1;
+            movepattern >>= 1;
         }
         break;
 
     case move_jump:
-        row = 0x0C;
-        if (pattern == 0x01)
+        moverow = 0x0C;
+        if (movepattern == 0x01)
         {
-            pattern = 0x80;
+            movepattern = 0x80;
         }
         else
         {
-            pattern >>= 1;
+            movepattern >>= 1;
         }
         break;
 
     case move_duck:
-        row = 0x10;
-        if (pattern == 0x01)
+        moverow = 0x10;
+        if (movepattern == 0x01)
         {
-            pattern = 0x80;
+            movepattern = 0x80;
         }
         else
         {
-            pattern >>= 1;
+            movepattern >>= 1;
         }
         break;
 
@@ -282,9 +287,37 @@ int move_tick(int state)
         break;
     }
 
-    PORTC = pattern;
-    PORTD = row;
     return state;
+}
+
+enum display_states { display_display };
+
+unsigned char finalpattern = 0x00;
+unsigned char finalrow = 0x00;
+
+int display_tick(int state) {
+	
+	switch (state) {
+		case display_display:
+			state = display_display;
+			break;
+
+		default:
+			state = display_display;
+			break;
+	}
+
+	switch (state) {
+		case display_display:
+			finalpattern = movepattern | openpattern;
+			finalrow = moverow | openrow;
+			break;
+	}
+
+	PORTC = finalpattern;
+	PORTD = finalrow;
+
+	return state;
 }
 
 unsigned long int findGCD (unsigned long int a, unsigned long int b) {
@@ -305,8 +338,8 @@ int main(void) {
     DDRD = 0xFF; PORTD = 0x00;
     /* Insert your solution below */
 
-    static task task1, task2;
-    task *tasks[] = { &task1, &task2 };
+    static task task1, task2, task3;
+    task *tasks[] = { &task1, &task2, &task3 };
     const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
     
     const char start = -1;
@@ -321,10 +354,10 @@ int main(void) {
     task2.elapsedTime = task2.period;
     task2.TickFct = &move_tick;
 
-    //task3.state = start;
-    //task3.period = 200;
-    //task3.elapsedTime = task3.period;
-    //task3.TickFct = &doorbellSMTick;    
+    task3.state = start;
+    task3.period = 10;
+    task3.elapsedTime = task3.period;
+    task3.TickFct = &display_tick;    
 
     unsigned short i;
 
