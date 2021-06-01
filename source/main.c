@@ -118,8 +118,8 @@ int open_tick(int state) {
 
     switch (state) {
         case open_wait:
-            pattern = 0xFF; 
-            row = 0x11; //flat row top and bottom
+            //pattern = 0xFF; 
+            //row = 0x11; //flat row top and bottom
             break;
 
         case open_display1:
@@ -156,7 +156,7 @@ int open_tick(int state) {
     return state;
 }
 
-enum move_states { move_wait, move_norm, move_jump, move_duck };
+enum move_states { move_wait, move_start, move_norm, move_jump, move_duck };
 
 int move_tick(int state)
 {
@@ -171,13 +171,17 @@ int move_tick(int state)
     case move_wait:
         if (begin)
         {
-            state = move_norm;
+            state = move_start;
         }
         else
         {
             state = move_wait;
         }
         break;
+
+    case move_start:
+	state = move_norm:
+	break;
 
     case move_norm:
         if (jump || jump2)
@@ -232,11 +236,14 @@ int move_tick(int state)
     switch (state)
     {
     case move_wait:
+	break;
+    
+    case move_start:
         pattern = 0x80;
-        row = 0x18;
         break;
 
     case move_norm:
+	row = 0x18;
         if (pattern == 0x01)
         { //reset to beginning of matrix
             pattern = 0x80;
