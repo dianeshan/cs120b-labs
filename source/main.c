@@ -6,6 +6,8 @@
  *
  *	I acknowledge all content contained herein, excluding template or example
  *	code, is my own original work.
+ *
+ *	Demo Link:
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -21,7 +23,7 @@ typedef struct _task {
     int (*TickFct)(int);
 } task;
 
-unsigned short level1 = [ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0 ];
+unsigned short level1[] = { 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0 };
 /*unsigned short level2 = [ 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
 unsigned short level3 = [ 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
 unsigned short level4 = [ 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 1, 0, 1, 0, 0, 2, 0, 0, 2, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
@@ -31,8 +33,8 @@ unsigned short level7 = [ 0, 0, 2, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 2, 0, 0, 
 */
 
 unsigned short i = 0;
-//unsigned char runpattern = 0;
-//unsigned char runrow = 0;
+unsigned char runpattern = 0;
+unsigned char runrow = 0;
 //unsigned char multip = ~PINA & 0x80;
 //unsigned char singlep = ~PINA & 0x40;
 
@@ -269,6 +271,12 @@ int run_tick(int state) {
     unsigned char numfails = 0;
     unsigned short j = 0;
     unsigned short k = 0;
+    unsigned char begin = ~PINA & 0x20;
+
+    unsigned char jump = ~PINA & 0x01;
+    unsigned char duck = ~PINA & 0x02;
+    unsigned char jump2 = ~PINA & 0x04;
+    unsigned char duck2 = ~PINA & 0x08;
 
     switch (state)
     {
@@ -288,7 +296,7 @@ int run_tick(int state) {
         {
             if (level1[i] == 1)
             {
-                if (jump)
+                if (jump || jump2)
                 {
                     i++;
                     state = run_lvl1;
@@ -302,7 +310,7 @@ int run_tick(int state) {
             }
             else if (level1[i] == 2)
             {
-                if (duck)
+                if (duck || duck2)
                 {
                     i++;
                     state = run_lvl1;
@@ -446,8 +454,10 @@ int run_tick(int state) {
         }
         else {
             k = 0;
-            runrow = 0x00;
+            runrow = 0x1F;
             runpattern = 0x00;
+	    moverow = 0x1F;
+	    movepattern = 0x00; 
         }
 
         break;
@@ -456,18 +466,24 @@ int run_tick(int state) {
         //display fail screen
         runpattern = 0xFF;
 	runrow = 0x00;
+	moverow = 0x1F;
+	movepattern = 0x00;
 	break;
 
     case run_congrats:
         //display pass level screen
         runpattern = 0xFF;
         runrow = 0x05;
+	moverow = 0x1F;
+	movepattern = 0x00;
         break;
 
     case run_win:
         //display you win screen
         runpattern = 0x55;
         runrow = 0x05;
+	moverow = 0x1F;
+	movepattern = 0x00;
         break;
 
     default:
@@ -525,8 +541,8 @@ int main(void) {
     DDRD = 0xFF; PORTD = 0x00;
     /* Insert your solution below */
 
-    static task task1, task2, task3;
-    task *tasks[] = { &task1, &task2, &task3 };
+    static task task1, task2, task3, task4;
+    task *tasks[] = { &task1, &task2, &task3, &task4 };
     const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
     
     const char start = -1;
@@ -542,9 +558,14 @@ int main(void) {
     task2.TickFct = &move_tick;
 
     task3.state = start;
-    task3.period = 1;
+    task3.period = 300;
     task3.elapsedTime = task3.period;
-    task3.TickFct = &display_tick;    
+    task3.TickFct = &run_tick;    
+
+    task4.state = start;
+    task4.period = 1;
+    task4.elapsedTime = task4.period;
+    task4.TickFct = &display_tick;
 
     unsigned short i;
 
