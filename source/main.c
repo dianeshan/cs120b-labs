@@ -222,6 +222,7 @@ int move_tick(int state)
 	break;
     
     case move_start:
+	moverow = 0x07;
         movepattern = 0x80;
         break;
 
@@ -328,7 +329,7 @@ int main(void) {
     task1.TickFct = &open_tick;    
 
     task2.state = start;
-    task2.period = 1000;
+    task2.period = 300;
     task2.elapsedTime = task2.period;
     task2.TickFct = &move_tick;
 
