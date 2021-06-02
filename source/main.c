@@ -20,9 +20,9 @@ typedef struct _task {
     unsigned long int elapsedTime;
     int (*TickFct)(int);
 } task;
-/*
+
 unsigned short level1 = [ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0 ];
-unsigned short level2 = [ 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
+/*unsigned short level2 = [ 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
 unsigned short level3 = [ 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
 unsigned short level4 = [ 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 1, 0, 1, 0, 0, 2, 0, 0, 2, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
 unsigned short level5 = [ 0, 0, 1, 0, 2, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 1, 0, 0, 0 ];
@@ -33,13 +33,8 @@ unsigned short level7 = [ 0, 0, 2, 0, 1, 0, 1, 0, 1, 0, 2, 0, 1, 0, 0, 2, 0, 0, 
 unsigned short i = 0;
 //unsigned char runpattern = 0;
 //unsigned char runrow = 0;
-//unsigned char begin = ~PINA & 0x20;
 //unsigned char multip = ~PINA & 0x80;
 //unsigned char singlep = ~PINA & 0x40;
-//unsigned char jump = ~PINA & 0x01;
-//unsigned char duck = ~PINA & 0x02;
-//unsigned char jump2 = ~PINA & 0x04;
-//unsigned char duck2 = ~PINA & 0x08;
 
 enum run_states { run_wait, run_lvl1, run_lvl2, run_lvl3, run_lvl4, run_lvl5, run_lvl6, run_lvl7, run_fail, run_congrats, run_win };
 
@@ -269,6 +264,219 @@ int move_tick(int state)
     return state;
 }
 
+int run_tick(int state) {
+    unsigned char prev = 0;
+    unsigned char numfails = 0;
+    unsigned short j = 0;
+    unsigned short k = 0;
+
+    switch (state)
+    {
+    case run_wait: //have a message displayed on matrix to show restarted or smth
+        if (begin)
+        {
+            state = run_lvl1;
+        }
+        else
+        {
+            state = run_wait;
+        }
+        break;
+
+    case run_lvl1:
+        if (i < 55)
+        {
+            if (level1[i] == 1)
+            {
+                if (jump)
+                {
+                    i++;
+                    state = run_lvl1;
+                }
+                else
+                {
+                    numfails = numfails + 1;
+                    prev = 1; //to keep track of what level we are on
+                    state = run_fail;
+                }
+            }
+            else if (level1[i] == 2)
+            {
+                if (duck)
+                {
+                    i++;
+                    state = run_lvl1;
+                }
+                else
+                {
+                    numfails = numfails + 1;
+                    prev = 1; //to keep track of what level we are on
+                    state = run_fail;
+                }
+            }
+            else
+            {
+                i++;
+                state = run_lvl1;
+            }
+        }
+        else
+        {
+            i = 0;
+            prev = 1;
+            state = run_congrats;
+        }
+        break;
+
+	case run_fail:
+        if (numfails >= 3)
+        {
+            numfails = 0;
+            state = run_wait;
+        }
+        else
+        {
+            if (prev == 1)
+            {
+                state = run_lvl1;
+            }
+            else if (prev == 2)
+            {
+                state = run_lvl2;
+            }
+            else if (prev == 3)
+            {
+                state = run_lvl3;
+            }
+            else if (prev == 4)
+            {
+                state = run_lvl4;
+            }
+            else if (prev == 5)
+            {
+                state = run_lvl5;
+            }
+            else if (prev == 6)
+            {
+                state = run_lvl6;
+            }
+            else if (prev == 7)
+            {
+                state = run_lvl7;
+            }
+            else
+            {
+                state = run_wait;
+            }
+        }
+        break;
+
+    case run_congrats:
+        if (prev == 1)
+        {
+            state = run_win;
+        }
+        else if (prev == 2)
+        {
+            state = run_lvl3;
+        }
+        else if (prev == 3)
+        {
+            state = run_lvl4;
+        }
+        else if (prev == 4)
+        {
+            state = run_lvl5;
+        }
+        else if (prev == 5)
+        {
+            state = run_lvl6;
+        }
+        else if (prev == 6)
+        {
+            state = run_lvl7;
+        }
+        else if (prev == 7)
+        {
+            state = run_win;
+        }
+        else
+        {
+            state = run_wait;
+        }
+        break;
+    	
+	case run_win: //display winning thing here
+        	state = run_wait;
+        	break;
+
+	default:
+            state = run_wait;
+        	break;
+	}
+
+    switch (state)
+    {
+    case run_wait:
+        //display will be from other state machine
+        break;
+
+    case run_lvl1:
+        //go through level 1 array and display
+        runpattern = 0x80;
+        if (k < 55)
+        {
+            for (j = 0; j < 8; j++)
+            {
+                if (level1[k] == 1)
+                {
+                    runrow = 0x1E;
+                }
+                else if (level1[k] == 2)
+                {
+                    runrow = 0x17;
+                }
+                else
+                {
+                    runrow = 0x1F;
+                }
+                runpattern >>= 1;
+                k++;
+            }
+        }
+        else {
+            k = 0;
+            runrow = 0x00;
+            runpattern = 0x00;
+        }
+
+        break;
+
+	case run_fail:
+        //display fail screen
+        runpattern = 0xFF;
+	runrow = 0x00;
+	break;
+
+    case run_congrats:
+        //display pass level screen
+        runpattern = 0xFF;
+        runrow = 0x05;
+        break;
+
+    case run_win:
+        //display you win screen
+        runpattern = 0x55;
+        runrow = 0x05;
+        break;
+
+    default:
+        break;
+    }
+
+    return state;
+}
+
 enum display_states { display_display };
 
 
@@ -288,8 +496,8 @@ int display_tick (int state) {
 
 	switch (state) {
 		case display_display:
-			finalpattern = movepattern | openpattern;
-			finalrow = moverow | openrow;
+			finalpattern = movepattern | openpattern | runpattern;
+			finalrow = moverow | openrow | runrow;
 			break;
 	}
 
