@@ -128,7 +128,7 @@ int open_tick(int state) {
 
         case open_display1:
             openpattern = 0x40;
-            openrow = 0x10;
+            openrow = 0x11;
             break;
 
         case open_display2:
@@ -193,9 +193,9 @@ int move_tick(int state)
         {
             state = move_jump;
         }
-        if (duck || duck2)
+	else if (duck || duck2)
         {
-            state = move_wait;
+            state = move_duck;
         }
         else
         {
@@ -204,33 +204,11 @@ int move_tick(int state)
         break;
 
     case move_jump:
-        if (jump || jump2)
-        {
-            state = move_jump;
-        }
-        if (duck || duck2)
-        {
-            state = move_wait;
-        }
-        else
-        {
-            state = move_norm;
-        }
+        state = move_norm;
         break;
 
     case move_duck:
-        if (jump || jump2)
-        {
-            state = move_jump;
-        }
-        if (duck || duck2)
-        {
-            state = move_wait;
-        }
-        else
-        {
-            state = move_norm;
-        }
+        state = move_norm;
         break;
 
     default:
@@ -260,7 +238,7 @@ int move_tick(int state)
         break;
 
     case move_jump:
-        moverow = 0x0C;
+        moverow = 0x13;
         if (movepattern == 0x01)
         {
             movepattern = 0x80;
@@ -272,7 +250,7 @@ int move_tick(int state)
         break;
 
     case move_duck:
-        moverow = 0x10;
+        moverow = 0x0F;
         if (movepattern == 0x01)
         {
             movepattern = 0x80;
@@ -292,10 +270,10 @@ int move_tick(int state)
 
 enum display_states { display_display };
 
-unsigned char finalpattern = 0x00;
-unsigned char finalrow = 0x00;
 
-int display_tick(int state) {
+int display_tick (int state) {
+	unsigned char finalpattern = 0x00;
+	unsigned char finalrow = 0x00;
 	
 	switch (state) {
 		case display_display:
@@ -350,12 +328,12 @@ int main(void) {
     task1.TickFct = &open_tick;    
 
     task2.state = start;
-    task2.period = 10;
+    task2.period = 1000;
     task2.elapsedTime = task2.period;
     task2.TickFct = &move_tick;
 
     task3.state = start;
-    task3.period = 10;
+    task3.period = 1;
     task3.elapsedTime = task3.period;
     task3.TickFct = &display_tick;    
 
