@@ -128,7 +128,7 @@ int open_tick(int state) {
 
         case open_display1:
             openpattern = 0x40;
-            openrow = 0x11;
+            openrow = 0x10;
             break;
 
         case open_display2:
@@ -248,7 +248,7 @@ int move_tick(int state)
         break;
 
     case move_norm:
-	moverow = 0x18;
+	moverow = 0x07;
         if (movepattern == 0x01)
         { //reset to beginning of matrix
             movepattern = 0x80;
@@ -350,7 +350,7 @@ int main(void) {
     task1.TickFct = &open_tick;    
 
     task2.state = start;
-    task2.period = 100;
+    task2.period = 10;
     task2.elapsedTime = task2.period;
     task2.TickFct = &move_tick;
 
