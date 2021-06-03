@@ -22,6 +22,8 @@ typedef struct _task {
     unsigned long int elapsedTime;
     int (*TickFct)(int);
 } task;
+
+unsigned short level1[] = {0, 0, 0, 1, 0, 0, 1, 0};
 /*
 unsigned short level1[] = { 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0 };
 unsigned short level2 = [ 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0 ];
@@ -265,12 +267,13 @@ int move_tick(int state)
 
     return state;
 }
-/*
+
+
 int run_tick(int state) {
     unsigned char prev = 0;
     unsigned char numfails = 0;
-    unsigned short j = 0;
-    unsigned short k = 0;
+    //unsigned short j = 0;
+    //unsigned short k = 0;
     unsigned char begin = ~PINA & 0x20;
 
     unsigned char jump = ~PINA & 0x01;
@@ -292,7 +295,7 @@ int run_tick(int state) {
         break;
 
     case run_lvl1:
-        if (i < 55)
+        if (i < 8)
         {
             if (level1[i] == 1)
             {
@@ -346,6 +349,7 @@ int run_tick(int state) {
         {
             if (prev == 1)
             {
+		i = 0;
                 state = run_lvl1;
             }
             else if (prev == 2)
@@ -431,35 +435,8 @@ int run_tick(int state) {
 
     case run_lvl1:
         //go through level 1 array and display
-        runpattern = 0x80;
-        if (k < 55)
-        {
-            for (j = 0; j < 8; j++)
-            {
-                if (level1[k] == 1)
-                {
-                    runrow = 0x1E;
-                }
-                else if (level1[k] == 2)
-                {
-                    runrow = 0x17;
-                }
-                else
-                {
-                    runrow = 0x1F;
-                }
-                runpattern >>= 1;
-                k++;
-            }
-        }
-        else {
-            k = 0;
-            runrow = 0x1F;
-            runpattern = 0x00;
-	    moverow = 0x1F;
-	    movepattern = 0x00; 
-        }
-
+        runpattern = 0x12;
+	runrow = 0x1E;
         break;
 
 	case run_fail:
@@ -492,7 +469,7 @@ int run_tick(int state) {
 
     return state;
 }
-*/
+
 enum display_states { display_display };
 
 
@@ -512,8 +489,8 @@ int display_tick (int state) {
 
 	switch (state) {
 		case display_display:
-			finalpattern = movepattern | openpattern;
-			finalrow = moverow | openrow;
+			finalpattern = movepattern | openpattern | runpattern;
+			finalrow = moverow | openrow | runrow;
 			break;
 	}
 
@@ -541,8 +518,8 @@ int main(void) {
     DDRD = 0xFF; PORTD = 0x00;
     /* Insert your solution below */
 
-    static task task1, task2, task3;
-    task *tasks[] = { &task1, &task2, &task3 };
+    static task task1, task2, task3, task4;
+    task *tasks[] = { &task1, &task2, &task3, &task4 };
     const unsigned short numTasks = sizeof(tasks)/sizeof(task*);
     
     const char start = -1;
@@ -557,15 +534,15 @@ int main(void) {
     task2.elapsedTime = task2.period;
     task2.TickFct = &move_tick;
 
-    //task3.state = start;
-    //task3.period = 300;
-    //task3.elapsedTime = task3.period;
-    //task3.TickFct = &run_tick;    
-
     task3.state = start;
-    task3.period = 1;
+    task3.period = 2400;
     task3.elapsedTime = task3.period;
-    task3.TickFct = &display_tick;
+    task3.TickFct = &run_tick;    
+
+    task4.state = start;
+    task4.period = 1;
+    task4.elapsedTime = task4.period;
+    task4.TickFct = &display_tick;
 
     unsigned short i;
 
