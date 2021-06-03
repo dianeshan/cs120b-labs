@@ -535,7 +535,7 @@ int main(void) {
     task2.TickFct = &move_tick;
 
     task3.state = start;
-    task3.period = 300;
+    task3.period = 2400;
     task3.elapsedTime = task3.period;
     task3.TickFct = &run_tick;    
 
