@@ -267,18 +267,21 @@ int lvl1_tick(int state)
         case lvl1_start:
             moverow = 0x07;
             movepattern = 0x80;
-            if (movepattern == 0x01) {
+            if (movepattern == 0x01 && (jump || jump2)) {
+                movepattern = 0x80;
+		moverow = 0x03;
+            }
+            else if (movepattern == 0x01 && (duck || duck2)) {
+                movepattern = 0x80;
+		moverow = 0x07;
+            }
+	    else if (movepattern == 0x01)
+            {
                 movepattern = 0x80;
             }
             else {
-                movepattern >>= 1;
-            }
-            if (jump || jump2)
-            {
-                runrow = 0x03;
-            }
-            else if (duck || duck2) {
-                runrow = 0x02;
+		moverow = 0x07;
+		movepattern >>= 1;
             }
             break;
 
