@@ -36,7 +36,7 @@ enum open_states
 //period of 1ms
 
 unsigned char openpattern = 0x00;
-unsigned char openrow = 0x00;
+unsigned char openrow = 0x1F;
 
 int open_tick(int state)
 {
@@ -145,7 +145,7 @@ int open_tick(int state)
 
     case open_off:
         openpattern = 0x00;
-        openrow = 0x00;
+        openrow = 0x1F;
         break;
 
     default:
@@ -156,9 +156,9 @@ int open_tick(int state)
 }
 
 unsigned char i = 0;
-unsigned char runrow = 0x00;
+unsigned char runrow = 0x1F;
 unsigned char runpattern = 0x00;
-unsigned char moverow = 0x00;
+unsigned char moverow = 0x1F;
 unsigned char movepattern = 0x00;
 unsigned char lvl1pattern[] = {0, 0, 0, 16, 0, 0, 2, 0};
 unsigned char lvl1row[] = { 31, 31, 31, 30, 31, 31, 30, 0};
@@ -260,7 +260,7 @@ int lvl1_tick(int state)
             break;
 
         case lvl1_setup:
-            runrow = 0x1E;
+            runrow = 0x0F;
             runpattern = 0x12;
             break;
 
@@ -375,7 +375,7 @@ int main(void)
     task2.state = start;
     task2.period = 300;
     task2.elapsedTime = task2.period;
-    task2.TickFct = &run_tick;
+    task2.TickFct = &lvl1_tick;
 
     //task3.state = start;
     //task3.period = 300;
