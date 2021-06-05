@@ -253,7 +253,13 @@ int lvl1_tick(int state)
 
     case lvl1_win:
 	win = 1;
-        state = lvl1_wait;
+	if (begin) {
+		win = 0;
+		state = lvl1_wait;
+	}
+	else {
+		state = lvl1_win;
+	}
         break;
 
     default:
@@ -297,9 +303,17 @@ int lvl1_tick(int state)
             break;
 
 	    case lvl1_fail:
+	    	movepattern = 0x00;
+		moverow = 0x1F;
+		runpattern = 0x00;
+		runrow = 0x1F;
 		break;
 
 	   case lvl1_win:
+		movepattern = 0x00;
+		moverow = 0x1F;
+		runpattern = 0x00;
+		runrow = 0x1F;
 		break;
 
 	   default:
