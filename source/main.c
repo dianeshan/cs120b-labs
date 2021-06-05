@@ -156,6 +156,8 @@ int open_tick(int state)
 }
 
 unsigned char i = 0;
+unsigned char win = 0;
+unsigned char lose = 0;
 unsigned char runrow = 0x1F;
 unsigned char runpattern = 0x00;
 unsigned char moverow = 0x1F;
@@ -183,6 +185,8 @@ int lvl1_tick(int state)
     switch (state)
     {
     case lvl1_wait:
+	win = 0;
+	lose = 0;
         if (begin) {
             state = lvl1_setup;
         }
@@ -235,8 +239,10 @@ int lvl1_tick(int state)
         break;
 
     case lvl1_fail:
+	lose = 1;
         if (begin)
         {
+	    lose = 0;
             state = lvl1_setup;
         }
         else
@@ -246,6 +252,7 @@ int lvl1_tick(int state)
         break;
 
     case lvl1_win:
+	win = 1;
         state = lvl1_wait;
         break;
 
@@ -290,13 +297,9 @@ int lvl1_tick(int state)
             break;
 
 	    case lvl1_fail:
-		runrow = 0x00;
-		runpattern = 0xFF;
 		break;
 
 	   case lvl1_win:
-		runrow = 0x05;
-		runpattern = 0x55;
 		break;
 
 	   default:
@@ -418,33 +421,33 @@ int win_tick(int state) {
 
     switch (state) {
         case win_wait:
-            unsigned char winrow = 0x1F;
-            unsigned char winpattern = 0x00;
+            winrow = 0x1F;
+            winpattern = 0x00;
             break;
 
         case win_s1:
-            unsigned char winrow = 0x00;
-            unsigned char winpattern = 0x40;
+            winrow = 0x00;
+            winpattern = 0x40;
             break;
 
         case win_s2:
-            unsigned char winrow = 0x17;
-            unsigned char winpattern = 0x20;
+            winrow = 0x17;
+            winpattern = 0x20;
             break;
 
         case win_s3:
-            unsigned char winrow = 0x1B;
-            unsigned char winpattern = 0x10;
+            winrow = 0x1B;
+            winpattern = 0x10;
             break;
 
         case win_s4:
-            unsigned char winrow = 0x17;
-            unsigned char winpattern = 0x08;
+            winrow = 0x17;
+            winpattern = 0x08;
             break;
 
         case win_s5:
-            unsigned char winrow = 0x00;
-            unsigned char winpattern = 0x40;
+            winrow = 0x00;
+            winpattern = 0x40;
             break;
 
         default:
@@ -517,7 +520,7 @@ int main(void)
     /* Insert your solution below */
 
     static task task1, task2, task3, task4, task5;
-    task *tasks[] = {&task1, &task2, &task3, &task3, &task4};
+    task *tasks[] = {&task1, &task2, &task3, &task4, &task5};
     const unsigned short numTasks = sizeof(tasks) / sizeof(task *);
 
     const char start = -1;
