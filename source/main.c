@@ -306,6 +306,154 @@ int lvl1_tick(int state)
         return state;
 }
 
+enum lose_states { lose_wait, lose_s1, lose_s2, lose_s3 };
+unsigned char loserow = 0x1F;
+unsigned char losepattern = 0x00;
+
+int lose_tick(int state) {
+    switch (state) {
+        case lose_wait:
+            if (lose) {
+                state = lose_s1;
+            }
+            else {
+                state = lose_wait;
+            }
+            break;
+
+        case lose_s1:
+            state = lose_s2;
+            break;
+
+        case lose_s2:
+            state = lose_s3;
+            break;
+
+        case lose_s3:
+            if (lose) {
+                state = lose_s1;
+            }
+            else {
+                state = lose_wait;
+            }
+            break;
+
+        default:
+            state = lose_wait;
+            break;
+    }
+
+    switch (state) {
+        case lose_wait:
+            loserow = 0x1F;
+            losepattern = 0x00;
+            break;
+
+        case lose_s1:
+            loserow = 0x00;
+            losepattern = 0x20;
+            break;
+
+        case lose_s2:
+            loserow = 0x0F;
+            losepattern = 0x10;
+            break;
+
+        case lose_s3:
+            loserow = 0x0F;
+            losepattern = 0x08;
+            break;
+
+        default:
+            break;
+    }
+
+    return state;
+}
+
+enum win_states { win_wait, win_s1, win_s2, win_s3, win_s4, win_s5 };
+unsigned char winrow = 0x1F;
+unsigned char winpattern = 0x00;
+
+int win_tick(int state) {
+    switch(state) {
+        case win_wait:
+            if (win) {
+                state = win_s1;
+            }
+            else {
+                state = win_wait;
+            }
+            break;
+
+        case win_s1:
+            state = win_s2;
+            break;
+
+        case win_s2:
+            state = win_s3;
+            break;
+
+        case win_s3:
+            state = win_s4;
+            break;
+
+        case win_s4:
+            state = win_s5;
+            break;
+
+        case win_s5:
+            if (win) {
+                state = win_s1;
+            }
+            else {
+                state = win_wait;
+            }
+            break;
+
+        default:
+            state = win_wait;
+            break;
+    }
+
+    switch (state) {
+        case win_wait:
+            unsigned char winrow = 0x1F;
+            unsigned char winpattern = 0x00;
+            break;
+
+        case win_s1:
+            unsigned char winrow = 0x00;
+            unsigned char winpattern = 0x40;
+            break;
+
+        case win_s2:
+            unsigned char winrow = 0x17;
+            unsigned char winpattern = 0x20;
+            break;
+
+        case win_s3:
+            unsigned char winrow = 0x1B;
+            unsigned char winpattern = 0x10;
+            break;
+
+        case win_s4:
+            unsigned char winrow = 0x17;
+            unsigned char winpattern = 0x08;
+            break;
+
+        case win_s5:
+            unsigned char winrow = 0x00;
+            unsigned char winpattern = 0x40;
+            break;
+
+        default:
+            break;
+    }
+
+    return state;
+}
+
 enum display_states
 {
     display_display
@@ -330,8 +478,8 @@ int display_tick(int state)
     switch (state)
     {
     case display_display:
-        finalpattern = runpattern | openpattern | movepattern;
-        finalrow = runrow & openrow & moverow;
+        finalpattern = runpattern | openpattern | movepattern | winpattern | losepattern;
+        finalrow = runrow & openrow & moverow & winrow & loserow;
         break;
     }
 
@@ -368,8 +516,8 @@ int main(void)
     PORTD = 0x00;
     /* Insert your solution below */
 
-    static task task1, task2, task3;
-    task *tasks[] = {&task1, &task2, &task3};
+    static task task1, task2, task3, task4, task5;
+    task *tasks[] = {&task1, &task2, &task3, &task3, &task4};
     const unsigned short numTasks = sizeof(tasks) / sizeof(task *);
 
     const char start = -1;
@@ -384,15 +532,20 @@ int main(void)
     task2.elapsedTime = task2.period;
     task2.TickFct = &lvl1_tick;
 
-    //task3.state = start;
-    //task3.period = 300;
-    //task3.elapsedTime = task3.period;
-    //task3.TickFct = &run_tick;
-
     task3.state = start;
     task3.period = 1;
     task3.elapsedTime = task3.period;
-    task3.TickFct = &display_tick;
+    task3.TickFct = &win_tick;
+
+    task4.state = start;
+    task4.period = 1;
+    task4.elapsedTime = task4.period;
+    task4.TickFct = &lose_tick;
+
+    task5.state = start;
+    task5.period = 1;
+    task5.elapsedTime = task5.period;
+    task5.TickFct = &display_tick;
 
     unsigned short i;
 
