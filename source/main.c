@@ -255,7 +255,7 @@ int lvl1_tick(int state)
 	win = 1;
 	if (begin) {
 		win = 0;
-		state = lvl1_wait;
+		state = lvl1_setup;
 	}
 	else {
 		state = lvl1_win;
@@ -461,7 +461,7 @@ int win_tick(int state) {
 
         case win_s5:
             winrow = 0x00;
-            winpattern = 0x40;
+            winpattern = 0x04;
             break;
 
         default:
