@@ -160,9 +160,7 @@ unsigned char runrow = 0x1F;
 unsigned char runpattern = 0x00;
 unsigned char moverow = 0x1F;
 unsigned char movepattern = 0x00;
-unsigned char lvl1pattern[] = {0, 0, 0, 16, 0, 0, 2, 0};
-unsigned char lvl1row[] = { 31, 31, 31, 30, 31, 31, 30, 0};
-char level1[] = {0, 0, 0, 1, 0, 0, 1, 0};
+char level1[] = {0, 0, 1, 0, 0, 0, 0, 0};
 
 enum lvl1_states
 {
@@ -227,6 +225,7 @@ int lvl1_tick(int state)
             }
             else
             {
+		i++;
                 state = lvl1_start;
             }
         }
@@ -261,15 +260,15 @@ int lvl1_tick(int state)
 
         case lvl1_setup:
             runrow = 0x0F;
-            runpattern = 0x12;
+            runpattern = 0x08;
+	    movepattern = 0x80;
             break;
 
         case lvl1_start:
             moverow = 0x07;
-            movepattern = 0x80;
             if (movepattern == 0x01 && (jump || jump2)) {
                 movepattern = 0x80;
-		moverow = 0x03;
+		moverow = 0x01;
             }
             else if (movepattern == 0x01 && (duck || duck2)) {
                 movepattern = 0x80;
@@ -280,7 +279,12 @@ int lvl1_tick(int state)
                 movepattern = 0x80;
             }
             else {
-		moverow = 0x07;
+		if (jump || jump2) {
+			moverow = 0x01;
+		}
+		else {
+			moverow = 0x07;
+		}
 		movepattern >>= 1;
             }
             break;
