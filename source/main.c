@@ -179,17 +179,19 @@ enum lvl1_states
 int lvl1_tick(int state)
 {
 
+    unsigned char start = ~PINA & 0x08;
     unsigned char begin = ~PINA & 0x20;
     unsigned char jump = ~PINA & 0x01;
     unsigned char jump2 = ~PINA & 0x02;
-    prev = 1;
+    unsigned char next = ~PINA & 0x04;
+    prev = 0;
 
     switch (state)
     {
     case lvl1_wait:
-	    win = 0;
-	    lose = 0;
-        if (begin) {
+	win = 0;
+	lose = 0;
+        if (start) {
             state = lvl1_setup;
         }
         else {
@@ -218,7 +220,7 @@ int lvl1_tick(int state)
             }
             else
             {
-		        i++;
+		i++;
                 state = lvl1_start;
             }
         }
@@ -229,7 +231,7 @@ int lvl1_tick(int state)
 
     case lvl1_fail:
 	lose = 1;
-        if (begin)
+        if (begin && (prev == 0))
         {
 	    lose = 0;
             state = lvl1_setup;
@@ -242,7 +244,8 @@ int lvl1_tick(int state)
 
     case lvl1_win:
 	win = 1;
-	if (begin) {
+	if (next) {
+		prev = 1;
 		win = 0;
 		state = lvl1_wait;
 	}
@@ -262,8 +265,8 @@ int lvl1_tick(int state)
 
         case lvl1_setup:
             runrow = 0x0F;
-            runpattern = 0x02;
-	        movepattern = 0x80;
+            runpattern = 0x08;
+	    movepattern = 0x80;
             break;
 
         case lvl1_start:
@@ -327,6 +330,7 @@ int lvl2_tick(int state)
     unsigned char jump = ~PINA & 0x01;
     unsigned char jump2 = ~PINA & 0x02;
     unsigned char next = ~PINA & 0x04;
+    i = 0;
 
     switch (state)
     {
@@ -373,7 +377,7 @@ int lvl2_tick(int state)
 
     case lvl2_fail:
 	lose = 1;
-        if (begin)
+        if ((begin) && prev == 1)
         {
 	        lose = 0;
             state = lvl2_setup;
@@ -403,6 +407,10 @@ int lvl2_tick(int state)
 
     switch (state) {
         case lvl2_wait:
+	    runrow = 0x1F;
+	    runpattern = 0x00;
+	    movepattern = 0x00;
+	    moverow = 0x1F;
             break;
 
         case lvl2_setup:
@@ -471,6 +479,7 @@ int lvl3_tick(int state)
     unsigned char next = ~PINA & 0x04;
     unsigned char jump = ~PINA & 0x01;
     unsigned char jump2 = ~PINA & 0x02;
+    i = 0;
 
     switch (state)
     {
@@ -517,7 +526,7 @@ int lvl3_tick(int state)
 
     case lvl3_fail:
 	lose = 1;
-        if (begin)
+        if ((begin) && (prev == 2))
         {
 	    lose = 0;
             state = lvl3_setup;
@@ -565,10 +574,6 @@ int lvl3_tick(int state)
             if (movepattern == 0x01 && (jump || jump2)) {
                 movepattern = 0x80;
 		moverow = 0x01;
-            }
-            else if (movepattern == 0x01 && (duck || duck2)) {
-                movepattern = 0x80;
-		moverow = 0x07;
             }
 	    else if (movepattern == 0x01)
             {
