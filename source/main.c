@@ -156,6 +156,7 @@ int open_tick(int state)
 }
 
 unsigned char i = 0;
+unsigned char prev = 0;
 unsigned char win = 0;
 unsigned char lose = 0;
 unsigned char runrow = 0x1F;
@@ -178,16 +179,16 @@ int lvl1_tick(int state)
 
     unsigned char begin = ~PINA & 0x20;
     unsigned char jump = ~PINA & 0x01;
-    unsigned char duck = ~PINA & 0x02;
-    unsigned char jump2 = ~PINA & 0x04;
-    unsigned char duck2 = ~PINA & 0x08;
+    unsigned char jump2 = ~PINA & 0x02;
+    unsigned char next = ~PINA & 0x04;
+    prev = 0;
 
     switch (state)
     {
     case lvl1_wait:
 	win = 0;
 	lose = 0;
-        if (begin) {
+        if (begin && (prev == 0)) {
             state = lvl1_setup;
         }
         else {
@@ -200,23 +201,10 @@ int lvl1_tick(int state)
         break;
 
     case lvl1_start:
-        if (i < 8) {
+        if (i < 6) {
             if (level1[i] == 1)
             {
                 if (jump || jump2)
-                {
-                    i++;
-                    state = lvl1_start;
-                }
-                else
-                {
-                    i = 0;
-                    state = lvl1_fail;
-                }
-            }
-            else if (level1[i] == 2)
-            {
-                if (duck || duck2)
                 {
                     i++;
                     state = lvl1_start;
@@ -253,9 +241,10 @@ int lvl1_tick(int state)
 
     case lvl1_win:
 	win = 1;
-	if (begin) {
+	if (next) {
+		prev = 1;
 		win = 0;
-		state = lvl1_setup;
+		state = lvl1_wait;
 	}
 	else {
 		state = lvl1_win;
@@ -269,6 +258,10 @@ int lvl1_tick(int state)
 
     switch (state) {
         case lvl1_wait:
+	    runrow = 0x1F;
+	    runpattern = 0x00;
+	    moverow = 0x1F;
+	    movepattern = 0x00;
             break;
 
         case lvl1_setup:
@@ -282,10 +275,6 @@ int lvl1_tick(int state)
             if (movepattern == 0x01 && (jump || jump2)) {
                 movepattern = 0x80;
 		moverow = 0x01;
-            }
-            else if (movepattern == 0x01 && (duck || duck2)) {
-                movepattern = 0x80;
-		moverow = 0x07;
             }
 	    else if (movepattern == 0x01)
             {
@@ -322,6 +311,7 @@ int lvl1_tick(int state)
 
         return state;
 }
+
 
 enum lose_states { lose_wait, lose_s1, lose_s2, lose_s3 };
 unsigned char loserow = 0x1F;
@@ -545,7 +535,7 @@ int main(void)
     task1.TickFct = &open_tick;
 
     task2.state = start;
-    task2.period = 300;
+    task2.period = 400;
     task2.elapsedTime = task2.period;
     task2.TickFct = &lvl1_tick;
 
