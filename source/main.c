@@ -163,15 +163,45 @@ unsigned char runrow = 0x1F;
 unsigned char runpattern = 0x00;
 unsigned char moverow = 0x1F;
 unsigned char movepattern = 0x00;
+unsigned char counter = 0;
+unsigned short periodlvl = 0;
 char level1[] = {0, 0, 1, 0, 0, 0, 0, 0};
+
+int periodFind(unsigned char prev) {
+	unsigned short periodf = 0;
+	if (prev == 0) {
+		periodf = 400;
+	}
+	else if (prev == 1) {
+		periodf = 350;
+	}
+	else if (prev == 2) {
+		periodf = 300;
+	}
+	else if (prev == 3) {
+		periodf = 250;
+	}
+	else if (prev == 4) {
+		periodf = 200;
+	}
+	else if (prev == 5) {
+		periodf = 150;
+	}
+	else if (prev == 6) {
+		periodf = 100;
+	}
+
+	return periodf;
+}
 
 enum lvl1_states
 {
     lvl1_wait,
     lvl1_start,
+    lvl1_pause,
     lvl1_setup,
     lvl1_fail,
-    lvl1_win,
+    lvl1_win
 };
 
 int lvl1_tick(int state)
@@ -181,14 +211,17 @@ int lvl1_tick(int state)
     unsigned char jump = ~PINA & 0x01;
     unsigned char jump2 = ~PINA & 0x02;
     unsigned char next = ~PINA & 0x04;
-    prev = 0;
+    unsigned char multip = ~PINA & 0x80;
+    //unsigned char singlep = ~PINA & 0x40;
+    unsigned short tick = 0;
 
     switch (state)
     {
     case lvl1_wait:
+	periodlvl = periodFind(prev);
 	win = 0;
 	lose = 0;
-        if (begin && (prev == 0)) {
+        if (begin) {
             state = lvl1_setup;
         }
         else {
@@ -201,34 +234,64 @@ int lvl1_tick(int state)
         break;
 
     case lvl1_start:
+	tick = tick + 50;
         if (i < 6) {
             if (level1[i] == 1)
             {
-                if (jump || jump2)
-                {
-                    i++;
-                    state = lvl1_start;
-                }
-                else
-                {
-                    i = 0;
-                    state = lvl1_fail;
-                }
+		if (multip) {
+                	if (jump || jump2)
+                	{
+                    	i++;
+                    	state = lvl1_pause;
+                	}
+                	else
+                	{
+                    	i = 0;
+                    	state = lvl1_fail;
+                	}
+		}
+		else {
+			if (jump) {
+				i++;
+				state = lvl1_pause;
+			}
+			else {
+				i = 0;
+				state = lvl1_fail;
+			}
+		}
             }
             else
             {
-		i++;
-                state = lvl1_start;
+                state = lvl1_pause;
             }
         }
         else {
-            state = lvl1_win;
-        }
+	    if (counter == 3) {
+		tick = 0;
+            	state = lvl1_win;
+	    }
+	    else {
+		counter++;
+		i = 0;
+		state = lvl1_setup;
+	    }
+	}
         break;
+
+    case lvl1_pause:
+	i++;
+	tick = tick + 50;
+	if (tick < periodlvl) {
+		state = lvl1_pause;
+	}
+	else {
+		state = lvl1_start;
+	}
 
     case lvl1_fail:
 	lose = 1;
-        if (begin && (prev == 0))
+        if (begin)
         {
 	    lose = 0;
             state = lvl1_setup;
@@ -240,15 +303,15 @@ int lvl1_tick(int state)
         break;
 
     case lvl1_win:
-	win = 1;
-	if (next && (prev == 0)) {
-		prev = 1;
-		win = 0;
-		state = lvl1_wait;
-	}
-	else {
-		state = lvl1_win;
-	}
+		win = 1;	
+		if (next) {
+			prev++;
+			win = 0;
+			state = lvl1_wait;
+		}
+		else {
+			state = lvl1_win;
+		}
         break;
 
     default:
@@ -265,9 +328,9 @@ int lvl1_tick(int state)
             break;
 
         case lvl1_setup:
-            runrow = 0x0F;
-            runpattern = 0x08;
 	    movepattern = 0x80;
+	    runrow = 0x07;
+	    runpattern = 0x08;
             break;
 
         case lvl1_start:
@@ -291,6 +354,9 @@ int lvl1_tick(int state)
             }
             break;
 
+	    case lvl1_pause:
+	    	break;
+
 	    case lvl1_fail:
 	    	movepattern = 0x00;
 		moverow = 0x1F;
@@ -312,6 +378,7 @@ int lvl1_tick(int state)
         return state;
 }
 
+/*
 char level2[] = {0, 0, 0, 0, 1, 0, 0, 0};
 
 enum lvl2_states
@@ -459,6 +526,7 @@ int lvl2_tick(int state)
 
         return state;
 }
+*/
 
 enum lose_states { lose_wait, lose_s1, lose_s2, lose_s3 };
 unsigned char loserow = 0x1F;
@@ -670,8 +738,8 @@ int main(void)
     PORTD = 0x00;
     /* Insert your solution below */
 
-    static task task1, task2, task3, task4, task5, task6;
-    task *tasks[] = {&task1, &task2, &task3, &task4, &task5, &task6};
+    static task task1, task2, task3, task4, task5;
+    task *tasks[] = {&task1, &task2, &task3, &task4, &task5};
     const unsigned short numTasks = sizeof(tasks) / sizeof(task *);
 
     const char start = -1;
@@ -682,14 +750,14 @@ int main(void)
     task1.TickFct = &open_tick;
 
     task2.state = start;
-    task2.period = 400;
+    task2.period = 300;
     task2.elapsedTime = task2.period;
     task2.TickFct = &lvl1_tick;
-
+ 
     task3.state = start;
-    task3.period = 350;
+    task3.period = 1;
     task3.elapsedTime = task3.period;
-    task3.TickFct = &lvl2_tick;
+    task3.TickFct = &win_tick;
 
     task4.state = start;
     task4.period = 1;
@@ -699,13 +767,13 @@ int main(void)
     task5.state = start;
     task5.period = 1;
     task5.elapsedTime = task5.period;
-    task5.TickFct = &win_tick;
-
+    task5.TickFct = &display_tick;
+/*
     task6.state = start;
     task6.period = 1;
     task6.elapsedTime = task6.period;
     task6.TickFct = &display_tick;
-
+*/
     unsigned short i;
 
     unsigned long GCD = tasks[0]->period;
