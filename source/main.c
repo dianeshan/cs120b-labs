@@ -228,7 +228,7 @@ int lvl1_tick(int state)
 
     case lvl1_fail:
 	lose = 1;
-        if (begin)
+        if (begin && (prev == 0))
         {
 	    lose = 0;
             state = lvl1_setup;
@@ -241,7 +241,7 @@ int lvl1_tick(int state)
 
     case lvl1_win:
 	win = 1;
-	if (next) {
+	if (next && (prev == 0)) {
 		prev = 1;
 		win = 0;
 		state = lvl1_wait;
@@ -312,6 +312,153 @@ int lvl1_tick(int state)
         return state;
 }
 
+char level2[] = {0, 0, 0, 0, 1, 0, 0, 0};
+
+enum lvl2_states
+{
+    lvl2_wait,
+    lvl2_start,
+    lvl2_setup,
+    lvl2_fail,
+    lvl2_win,
+};
+
+int lvl2_tick(int state)
+{
+
+    unsigned char begin = ~PINA & 0x20;
+    unsigned char jump = ~PINA & 0x01;
+    unsigned char jump2 = ~PINA & 0x02;
+    unsigned char next = ~PINA & 0x04;
+
+    switch (state)
+    {
+    case lvl2_wait:
+	win = 0;
+	lose = 0;
+        if (begin && (prev == 1)) {
+            state = lvl2_setup;
+        }
+        else {
+            state = lvl2_wait;
+        }
+        break;
+
+    case lvl2_setup:
+        state = lvl2_start;
+        break;
+
+    case lvl2_start:
+        if (i < 8) {
+            if (level2[i] == 1)
+            {
+                if (jump || jump2)
+                {
+                    i++;
+                    state = lvl2_start;
+                }
+                else
+                {
+                    i = 0;
+                    state = lvl2_fail;
+                }
+            }
+            else
+            {
+		        i++;
+                state = lvl2_start;
+            }
+        }
+        else {
+            state = lvl2_win;
+        }
+        break;
+
+    case lvl2_fail:
+	lose = 1;
+        if (begin && (prev == 1))
+        {
+	        lose = 0;
+            state = lvl2_setup;
+        }
+        else
+        {
+            state = lvl2_fail;
+        }
+        break;
+
+    case lvl1_win:
+	win = 1;
+	if (next && (prev == 1)) {
+		prev = 2;
+		win = 0;
+		state = lvl2_wait;
+	}
+	else {
+		state = lvl2_win;
+	}
+    break;
+
+    default:
+        state = lvl2_wait;
+        break;
+    }
+
+    switch (state) {
+        case lvl2_wait:
+	    runrow = 0x1F;
+	    runpattern = 0x00;
+	    moverow = 0x1F;
+	    movepattern = 0x00;
+            break;
+
+        case lvl2_setup:
+            runrow = 0x0F;
+            runpattern = 0x02;
+	    movepattern = 0x80;
+            break;
+
+        case lvl2_start:
+            moverow = 0x07;
+            if (movepattern == 0x01 && (jump || jump2)) {
+                movepattern = 0x80;
+		moverow = 0x01;
+            }
+	    else if (movepattern == 0x01)
+            {
+                movepattern = 0x80;
+            }
+            else {
+		if (jump || jump2) {
+			moverow = 0x01;
+		}
+		else {
+			moverow = 0x07;
+		}
+		movepattern >>= 1;
+            }
+            break;
+
+	    case lvl2_fail:
+	    	movepattern = 0x00;
+		moverow = 0x1F;
+		runpattern = 0x00;
+		runrow = 0x1F;
+		break;
+
+	   case lvl2_win:
+		movepattern = 0x00;
+		moverow = 0x1F;
+		runpattern = 0x00;
+		runrow = 0x1F;
+		break;
+
+	   default:
+		break;
+        }
+
+        return state;
+}
 
 enum lose_states { lose_wait, lose_s1, lose_s2, lose_s3 };
 unsigned char loserow = 0x1F;
@@ -523,8 +670,8 @@ int main(void)
     PORTD = 0x00;
     /* Insert your solution below */
 
-    static task task1, task2, task3, task4, task5;
-    task *tasks[] = {&task1, &task2, &task3, &task4, &task5};
+    static task task1, task2, task3, task4, task5, task6;
+    task *tasks[] = {&task1, &task2, &task3, &task4, &task5, &task6};
     const unsigned short numTasks = sizeof(tasks) / sizeof(task *);
 
     const char start = -1;
@@ -540,9 +687,9 @@ int main(void)
     task2.TickFct = &lvl1_tick;
 
     task3.state = start;
-    task3.period = 1;
+    task3.period = 350;
     task3.elapsedTime = task3.period;
-    task3.TickFct = &win_tick;
+    task3.TickFct = &lvl2_tick;
 
     task4.state = start;
     task4.period = 1;
@@ -552,7 +699,12 @@ int main(void)
     task5.state = start;
     task5.period = 1;
     task5.elapsedTime = task5.period;
-    task5.TickFct = &display_tick;
+    task5.TickFct = &win_tick;
+
+    task6.state = start;
+    task6.period = 1;
+    task6.elapsedTime = task6.period;
+    task6.TickFct = &display_tick;
 
     unsigned short i;
 
