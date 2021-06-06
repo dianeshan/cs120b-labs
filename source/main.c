@@ -288,6 +288,7 @@ int lvl1_tick(int state)
 	else {
 		state = lvl1_start;
 	}
+	break;
 
     case lvl1_fail:
 	lose = 1;
