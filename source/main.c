@@ -156,15 +156,13 @@ int open_tick(int state)
 }
 
 unsigned char i = 0;
-unsigned char prev = 0;
+//unsigned char prev = 0;
 unsigned char win = 0;
 unsigned char lose = 0;
 unsigned char runrow = 0x1F;
 unsigned char runpattern = 0x00;
 unsigned char moverow = 0x1F;
 unsigned char movepattern = 0x00;
-
-enum lvl1_states { lvl1_wait, lvl1_run, lvl1_pause, lvl1_fail, lvl1_win };
 
 unsigned char lvl1pattern[] = {0x10, 0x04};
 unsigned char lvl1row[] = {0x0F, 0x1E};
@@ -270,9 +268,6 @@ int lvl1_tick(int state) {
 	        movepattern = 0x00;
             break;
 
-        case lvl1_pause:
-            break;
-
         case lvl1_run: //run every 2 ms
             if (i < 8) {
                 runrow = 0x0F;
@@ -284,12 +279,15 @@ int lvl1_tick(int state) {
             }
             break;
 
-        case lvl1_fail:
-            movepattern = 0x00;
-            moverow = 0x1F;
-            runpattern = 0x00;
-            runrow = 0x1F;
-            break;
+	    case lvl1_pause:
+	    	break;
+
+	    case lvl1_fail:
+	    	movepattern = 0x00;
+		moverow = 0x1F;
+		runpattern = 0x00;
+		runrow = 0x1F;
+		break;
 
         case lvl1_win:
             movepattern = 0x00;
@@ -627,8 +625,8 @@ int main(void)
     PORTD = 0x00;
     /* Insert your solution below */
 
-    static task task1, task2, task3, task4, task5, task6;
-    task *tasks[] = {&task1, &task2, &task3, &task4, &task5, &task6};
+    static task task1, task2, task3, task4, task5;
+    task *tasks[] = {&task1, &task2, &task3, &task4, &task5};
     const unsigned short numTasks = sizeof(tasks) / sizeof(task *);
 
     const char start = -1;
@@ -639,14 +637,24 @@ int main(void)
     task1.TickFct = &open_tick;
 
     task2.state = start;
+<<<<<<< HEAD
     task2.period = 2;
+=======
+    task2.period = 300;
+>>>>>>> c4347407dcbdd6a5115325d723a24baa11790d6a
     task2.elapsedTime = task2.period;
     task2.TickFct = &lvl1_tick;
-
+ 
     task3.state = start;
+<<<<<<< HEAD
     task3.period = 300;
     task3.elapsedTime = task3.period;
     task3.TickFct = &move_tick;
+=======
+    task3.period = 1;
+    task3.elapsedTime = task3.period;
+    task3.TickFct = &win_tick;
+>>>>>>> c4347407dcbdd6a5115325d723a24baa11790d6a
 
     task4.state = start;
     task4.period = 1;
@@ -656,13 +664,13 @@ int main(void)
     task5.state = start;
     task5.period = 1;
     task5.elapsedTime = task5.period;
-    task5.TickFct = &win_tick;
-
+    task5.TickFct = &display_tick;
+/*
     task6.state = start;
     task6.period = 1;
     task6.elapsedTime = task6.period;
     task6.TickFct = &display_tick;
-
+*/
     unsigned short i;
 
     unsigned long GCD = tasks[0]->period;
