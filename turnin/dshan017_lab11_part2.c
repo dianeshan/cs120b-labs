@@ -155,201 +155,134 @@ int open_tick(int state)
     return state;
 }
 
-unsigned char i = 0;
-unsigned char prev = 0;
+//unsigned char i = 0;
+//unsigned char prev = 0;
 unsigned char win = 0;
 unsigned char lose = 0;
 unsigned char runrow = 0x1F;
 unsigned char runpattern = 0x00;
 unsigned char moverow = 0x1F;
 unsigned char movepattern = 0x00;
-char level1[] = {0, 0, 1, 0, 0, 0, 0, 0};
-char level2[] = {0, 0, 0, 0, 1, 0, 0, 0};
 
-enum lvl1_states
-{
-    lvl1_wait,
-    lvl1_start,
-    lvl1_start2,
-    lvl1_setup,
-    lvl1_setup2,
-    lvl1_fail,
-    lvl1_win
-};
+unsigned char lvl1pattern[] = {0x10, 0x04};
+unsigned char lvl1row[] = {0x0F, 0x1E};
+unsigned char lvl1[] = {0, 0, 0, 1, 0, 0, 0, 0 };
+int period1 = 0;
+int i = 0;
 
-int lvl1_tick(int state)
-{
+enum lvl1_states { lvl1_wait, lvl1_run, lvl1_pause, lvl1_fail, lvl1_win};
 
+int lvl1_tick(int state) {
     unsigned char begin = ~PINA & 0x20;
     unsigned char jump = ~PINA & 0x01;
-    unsigned char jump2 = ~PINA & 0x02;
+    unsigned char duck = ~PINA & 0x02;
+    unsigned char jump2 = ~PINA & 0x04;
+    unsigned char duck2 = ~PINA & 0x08; 
     unsigned char next = ~PINA & 0x04;
-    unsigned char multip = ~PINA & 0x80;
 
-    switch (state)
-    {
-    case lvl1_wait:
-	win = 0;
-	lose = 0;
-        if ((begin && (prev == 0)) || multip) {
-            state = lvl1_setup;
-        }
-	else if (begin && (prev == 1)) {
-	    state = lvl1_setup2;
-	}
-        else {
-            state = lvl1_wait;
-        }
-        break;
+    switch (state) {
+        case lvl1_wait:
+            if (begin) {
+                state = lvl1_run;
+            }
+            else {
+                state = lvl1_wait;
+            }
+            break;
 
-    case lvl1_setup:
-        state = lvl1_start;
-        break;
-
-    case lvl1_setup2:
-	state = lvl1_start2;
-	break;
-
-    case lvl1_start:
-        if (i < 6) {
-            if (level1[i] == 1)
-            {
-                if (jump || jump2)
-                {
+        case lvl1_run:
+            period1 = period1 + 2;
+            if (i < 16) {
+                if (lvl1[i] == 1) {
+                    if (jump || jump2) {
+                        i++;
+                        state = lvl1_pause;
+                    }
+                    else {
+                        i = 0;
+                        state = lvl1_fail;
+                    }
+                }
+                else if (lvl1[i] == 2) {
+                    if (duck || duck2) {
+                        i++;
+                        state = lvl1_pause;
+                    }
+                    else {
+                        i = 0;
+                        state = lvl1_fail;
+                    }
+                }
+                else {
                     i++;
-                    state = lvl1_start;
-                }
-                else
-                {
-                    i = 0;
-                    state = lvl1_fail;
+                    state = lvl1_pause;
                 }
             }
-            else
-            {
-		i++;
-                state = lvl1_start;
+            else {
+                i = 0;
+                state = lvl1_win;
             }
-        }
-        else {
-            state = lvl1_win;
-        }
-        break;
+            break;
+        
+        case lvl1_pause:
+            period1 = period1 + 2;
+            if (period1 == 300) {
+                period1 = 0;
+                state = lvl1_run;
+            }
+            else {
+                state = lvl1_pause;
+            }
+            break;
 
-    case lvl1_start2:
-	if (i < 6) {
-		if (level2[i] == 1) {
-			if (jump || jump2) {
-				i++;
-				state = lvl1_start2;
-			}
-			else {
-				i = 0;
-				state = lvl1_fail;
-			}
-		}
-		else {
-			i++;
-			state = lvl1_start2;
-		}
-	}
-	else {
-		state = lvl1_win;
-	}
-	break;
+        case lvl1_fail:
+            lose = 1;
+            if (begin) {
+                lose = 0;
+                state = lvl1_run;
+            }
+            else {
+                state = lvl1_fail;
+            }
+            break;
 
-    case lvl1_fail:
-	lose = 1;
-        if (begin && (prev == 0))
-        {
-	    lose = 0;
-            state = lvl1_setup;
-        }
-	else if (begin && (prev == 1)) {
-		lose = 0;
-		state = lvl1_setup2;
-	}
-        else
-        {
-            state = lvl1_fail;
-        }
-        break;
+        case lvl1_win:
+            win = 1;
+            if (next) {
+                win = 0;
+                state = lvl1_wait;
+            }
+            else {
+                state = lvl1_win;
+            }
+            break;
 
-    case lvl1_win:
-	win = 1;
-	if (next) {
-		prev++;
-		win = 0;
-		i = 0;
-		state = lvl1_wait;
-	}
-	else {
-		state = lvl1_win;
-	}
-        break;
-
-    default:
-        state = lvl1_wait;
-        break;
+        default:
+            state = lvl1_wait;
+            break;
     }
 
     switch (state) {
         case lvl1_wait:
-	    runrow = 0x1F;
-	    runpattern = 0x00;
-	    moverow = 0x1F;
-	    movepattern = 0x00;
+            runrow = 0x1F;
+	        runpattern = 0x00;
+	        moverow = 0x1F;
+	        movepattern = 0x00;
             break;
 
-        case lvl1_setup:
-            runrow = 0x0F;
-            runpattern = 0x08;
-	    movepattern = 0x80;
-            break;
-
-	case lvl1_setup2:
-	    runrow = 0x0F;
-	    runpattern = 0x02;
-	    movepattern = 0x80;
-	    break;
-
-        case lvl1_start:
-            moverow = 0x07;
-            if (movepattern == 0x01 && (jump || jump2)) {
-                movepattern = 0x80;
-		moverow = 0x01;
-            }
-	    else if (movepattern == 0x01)
-            {
-                movepattern = 0x80;
+        case lvl1_run: //run every 2 ms
+            if (i < 8) {
+                runrow = 0x0F;
+                runpattern = 0x10; 
             }
             else {
-		if (jump || jump2) {
-			moverow = 0x01;
-		}
-		else {
-			moverow = 0x07;
-		}
-		movepattern >>= 1;
+                runrow = 0x17;
+                runpattern = 0x04;
             }
             break;
 
-	case lvl1_start2:
-		moverow = 0x07;
-		if (movepattern == 0x01 && (jump || jump2)) {
-			movepattern = 0x80;
-			moverow = 0x01;
-		}
-		else if (movepattern == 0x01) {
-			movepattern = 0x80;
-		}
-		else {
-			if (jump || jump2) {
-				moverow = 0x01;
-			}
-			movepattern >>= 1;
-		}
-		break;
+	    case lvl1_pause:
+	    	break;
 
 	    case lvl1_fail:
 	    	movepattern = 0x00;
@@ -358,20 +291,129 @@ int lvl1_tick(int state)
 		runrow = 0x1F;
 		break;
 
-	   case lvl1_win:
-		movepattern = 0x00;
-		moverow = 0x1F;
-		runpattern = 0x00;
-		runrow = 0x1F;
-		break;
+        case lvl1_win:
+            movepattern = 0x00;
+		    moverow = 0x1F;
+		    runpattern = 0x00;
+		    runrow = 0x1F;
+		    break;
 
-	   default:
-		break;
-        }
+        default:
+            break;
+    }
 
-        return state;
+    return state;
 }
 
+//how the person runs
+enum move_states { move_wait, move_start, move_norm, move_jump, move_duck };
+
+
+int move_tick(int state)
+{
+    unsigned char begin = ~PINA & 0x20;
+    unsigned char jump = ~PINA & 0x01;
+    unsigned char duck = ~PINA & 0x02;
+    unsigned char jump2 = ~PINA & 0x04;
+    unsigned char duck2 = ~PINA & 0x08;
+
+    switch (state)
+    {
+    case move_wait:
+        if (begin)
+        {
+            state = move_start;
+        }
+        else
+        {
+            state = move_wait;
+        }
+        break;
+
+    case move_start:
+	state = move_norm;
+	break;
+
+    case move_norm:
+        if (jump || jump2)
+        {
+            state = move_jump;
+        }
+	else if (duck || duck2)
+        {
+            state = move_duck;
+        }
+        else
+        {
+            state = move_norm;
+        }
+        break;
+
+    case move_jump:
+        state = move_norm;
+        break;
+
+    case move_duck:
+        state = move_norm;
+        break;
+
+    default:
+        state = move_wait;
+        break;
+    }
+
+    switch (state)
+    {
+    case move_wait:
+	break;
+    
+    case move_start:
+	    moverow = 0x07;
+        movepattern = 0x80;
+        break;
+
+    case move_norm:
+	    moverow = 0x07;
+        if (movepattern == 0x01)
+        { //reset to beginning of matrix
+            movepattern = 0x80;
+        }
+        else
+        {
+            movepattern >>= 1;
+        }
+        break;
+
+    case move_jump:
+        moverow = 0x13;
+        if (movepattern == 0x01)
+        {
+            movepattern = 0x80;
+        }
+        else
+        {
+            movepattern >>= 1;
+        }
+        break;
+
+    case move_duck:
+        moverow = 0x0F;
+        if (movepattern == 0x01)
+        {
+            movepattern = 0x80;
+        }
+        else
+        {
+            movepattern >>= 1;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return state;
+}
 
 enum lose_states { lose_wait, lose_s1, lose_s2, lose_s3 };
 unsigned char loserow = 0x1F;
@@ -454,40 +496,20 @@ int win_tick(int state) {
             break;
 
         case win_s1:
-	    if (win) {
-		state = win_s2;
-	    }
-	    else {
-            	state = win_s2;
-	    }
-	    break;
+            state = win_s2;
+            break;
 
         case win_s2:
-	    if (win) {
-		state = win_s3;	
-	    }
-	    else {
-		state = win_wait;
-	    }
+            state = win_s3;
             break;
 
         case win_s3:
-	    if (win) {
-		state = win_s4;
-	    }
-	    else {
-		state = win_wait;
-	    }
+            state = win_s4;
             break;
 
         case win_s4:
-	    if (win) {
-            	state = win_s5;
-	    }
-	    else {
-		state = win_wait;
-	    }
-	    break;
+            state = win_s5;
+            break;
 
         case win_s5:
             if (win) {
@@ -603,8 +625,8 @@ int main(void)
     PORTD = 0x00;
     /* Insert your solution below */
 
-    static task task1, task2, task3, task4, task5;
-    task *tasks[] = {&task1, &task2, &task3, &task4, &task5};
+    static task task1, task2, task3, task4, task5, task6;
+    task *tasks[] = {&task1, &task2, &task3, &task4, &task5, &task6};
     const unsigned short numTasks = sizeof(tasks) / sizeof(task *);
 
     const char start = -1;
@@ -615,14 +637,14 @@ int main(void)
     task1.TickFct = &open_tick;
 
     task2.state = start;
-    task2.period = 400;
+    task2.period = 2;
     task2.elapsedTime = task2.period;
     task2.TickFct = &lvl1_tick;
-
+ 
     task3.state = start;
-    task3.period = 1;
+    task3.period = 300;
     task3.elapsedTime = task3.period;
-    task3.TickFct = &win_tick;
+    task3.TickFct = &move_tick;
 
     task4.state = start;
     task4.period = 1;
@@ -632,7 +654,12 @@ int main(void)
     task5.state = start;
     task5.period = 1;
     task5.elapsedTime = task5.period;
-    task5.TickFct = &display_tick;
+    task5.TickFct = &win_tick;
+
+    task6.state = start;
+    task6.period = 1;
+    task6.elapsedTime = task6.period;
+    task6.TickFct = &display_tick;
 
     unsigned short i;
 
