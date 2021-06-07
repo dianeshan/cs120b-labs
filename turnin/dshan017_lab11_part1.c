@@ -155,6 +155,7 @@ int open_tick(int state)
     return state;
 }
 
+
 unsigned char i = 0;
 unsigned char prev = 0;
 unsigned char win = 0;
@@ -163,21 +164,37 @@ unsigned char runrow = 0x1F;
 unsigned char runpattern = 0x00;
 unsigned char moverow = 0x1F;
 unsigned char movepattern = 0x00;
+
 char level1[] = {0, 0, 1, 0, 0, 0, 0, 0};
 char level2[] = {0, 0, 0, 0, 1, 0, 0, 0};
+char level3[] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0};
+char level4[] = {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0};
+char level5[] = {0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+char level6[] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0};
+char level7[] = {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
 
-enum lvl1_states
+enum run_states
 {
-    lvl1_wait,
-    lvl1_start,
-    lvl1_start2,
-    lvl1_setup,
-    lvl1_setup2,
-    lvl1_fail,
-    lvl1_win
+    run_wait,
+    run_start,
+    run_start2,
+    run_start3,
+    run_start4,
+    run_start5,
+    run_start6,
+    run_start7,
+    run_setup,
+    run_setup2,
+    run_setup3,
+    run_setup4,
+    run_setup5,
+    run_setup6,
+    run_setup7,
+    run_fail,
+    run_win
 };
 
-int lvl1_tick(int state)
+int run_tick(int state)
 {
 
     unsigned char begin = ~PINA & 0x20;
@@ -188,190 +205,524 @@ int lvl1_tick(int state)
 
     switch (state)
     {
-    case lvl1_wait:
+    case run_wait:
 	win = 0;
 	lose = 0;
         if ((begin && (prev == 0)) || multip) {
-            state = lvl1_setup;
+            state = run_setup;
         }
-	else if (begin && (prev == 1)) {
-	    state = lvl1_setup2;
-	}
+	    else if (begin && (prev == 1)) {
+	        state = run_setup2;
+	    }
+        else if (begin && (prev == 2)) {
+            state = run_setup3;
+        }
+        else if (begin && (prev == 3)) {
+            state = run_setup4;
+        }
+        else if (begin && (prev == 4)) {
+            state = run_setup5;
+        }
+        else if (begin && (prev == 5)) {
+            state = run_setup6;
+        }
+        else if (begin && (prev == 6)) {
+            state = run_setup7;
+        }
         else {
-            state = lvl1_wait;
+            state = run_wait;
         }
         break;
 
-    case lvl1_setup:
-        state = lvl1_start;
+    case run_setup:
+        state = run_start;
         break;
 
-    case lvl1_setup2:
-	state = lvl1_start2;
-	break;
+    case run_setup2:
+	    state = run_start2;
+	    break;
 
-    case lvl1_start:
+    case run_setup3:
+        state = run_start3;
+        break;
+
+    case run_setup4:
+        state = run_start4;
+        break;
+
+    case run_setup5:
+        state = run_start5;
+        break;
+
+    case run_setup6:
+        state = run_start6;
+        break;
+
+    case run_setup7:
+        state = run_start7;
+        break;
+
+    case run_start:
         if (i < 6) {
             if (level1[i] == 1)
             {
                 if (jump || jump2)
                 {
                     i++;
-                    state = lvl1_start;
+                    state = run_start;
                 }
                 else
                 {
                     i = 0;
-                    state = lvl1_fail;
+                    state = run_fail;
                 }
             }
             else
             {
-		i++;
-                state = lvl1_start;
+		        i++;
+                state = run_start;
             }
         }
         else {
-            state = lvl1_win;
+            state = run_win;
         }
         break;
 
-    case lvl1_start2:
-	if (i < 6) {
-		if (level2[i] == 1) {
-			if (jump || jump2) {
-				i++;
-				state = lvl1_start2;
-			}
-			else {
-				i = 0;
-				state = lvl1_fail;
-			}
-		}
-		else {
-			i++;
-			state = lvl1_start2;
-		}
-	}
-	else {
-		state = lvl1_win;
-	}
-	break;
+    case run_start2:
+        if (i < 6) {
+            if (level2[i] == 1) {
+                if (jump || jump2) {
+                    i++;
+                    state = run_start2;
+                }
+                else {
+                    i = 0;
+                    state = run_fail;
+                }
+            }
+            else {
+                i++;
+                state = run_start2;
+            }
+        }
+        else {
+            state = run_win;
+        }
+        break;
 
-    case lvl1_fail:
-	lose = 1;
+    case run_start3:
+        if (i < 12) {
+            if (level3[i] == 1) {
+                if (jump || jump2) {
+                    i++;
+                    state = run_start3;
+                }
+                else {
+                    i = 0;
+                    state = run_fail;
+                }
+            }
+            else {
+                i++;
+                state = run_start3;
+            }
+        }
+        else {
+            state = run_win;
+        }
+        break;
+
+    case run_start4:
+        if (i < 12) {
+            if (level4[i] == 1) {
+                if (jump || jump2) {
+                    i++;
+                    state = run_start4;
+                }
+                else {
+                    i = 0;
+                    state = run_fail;
+                }
+            }
+            else {
+                i++;
+                state = run_start4;
+            }
+        }
+        else {
+            state = run_win;
+        }
+        break;
+
+    case run_start5:
+        if (i < 18) {
+            if (level5[i] == 1) {
+                if (jump || jump2) {
+                    i++;
+                    state = run_start5;
+                }
+                else {
+                    i = 0;
+                    state = run_fail;
+                }
+            }
+            else {
+                i++;
+                state = run_start5;
+            }
+        }
+        else {
+            state = run_win;
+        }
+        break;
+
+    case run_start6:
+        if (i < 18) {
+            if (level6[i] == 1) {
+                if (jump || jump2) {
+                    i++;
+                    state = run_start6;
+                }
+                else {
+                    i = 0;
+                    state = run_fail;
+                }
+            }
+            else {
+                i++;
+                state = run_start6;
+            }
+        }
+        else {
+            state = run_win;
+        }
+        break;
+        
+    case run_start7:
+        if (i < 24) {
+            if (level7[i] == 1) {
+                if (jump || jump2) {
+                    i++;
+                    state = run_start7;
+                }
+                else {
+                    i = 0;
+                    state = run_fail;
+                }
+            }
+            else {
+                i++;
+                state = run_start7;
+            }
+        }
+        else {
+            state = run_win;
+        }
+        break;
+
+    case run_fail:
+	    lose = 1;
         if (begin && (prev == 0))
         {
-	    lose = 0;
-            state = lvl1_setup;
+	        lose = 0;
+            state = run_setup;
         }
-	else if (begin && (prev == 1)) {
-		lose = 0;
-		state = lvl1_setup2;
-	}
+	    else if (begin && (prev == 1)) {
+		    lose = 0;
+		    state = run_setup2;
+	    }  
+        else if (begin && (prev == 2)) {
+		    lose = 0;
+		    state = run_setup3;
+	    } 
+        else if (begin && (prev == 3)) {
+		    lose = 0;
+		    state = run_setup4;
+	    }   
+        else if (begin && (prev == 4)) {
+		    lose = 0;
+		    state = run_setup5;
+	    }  
+        else if (begin && (prev == 5)) {
+		    lose = 0;
+		    state = run_setup6;
+	    }  
+        else if (begin && (prev == 6)) {
+		    lose = 0;
+		    state = run_setup7;
+	    }  
         else
         {
-            state = lvl1_fail;
+            state = run_fail;
         }
         break;
 
-    case lvl1_win:
+    case run_win:
 	win = 1;
 	if (next) {
 		prev++;
 		win = 0;
 		i = 0;
-		state = lvl1_wait;
+		state = run_wait;
 	}
 	else {
-		state = lvl1_win;
+		state = run_win;
 	}
         break;
 
     default:
-        state = lvl1_wait;
+        state = run_wait;
         break;
     }
 
     switch (state) {
-        case lvl1_wait:
-	    runrow = 0x1F;
-	    runpattern = 0x00;
-	    moverow = 0x1F;
-	    movepattern = 0x00;
+        case run_wait:
+            runrow = 0x1F;
+            runpattern = 0x00;
+            moverow = 0x1F;
+            movepattern = 0x00;
             break;
 
-        case lvl1_setup:
+        case run_setup:
             runrow = 0x0F;
             runpattern = 0x08;
-	    movepattern = 0x80;
+	        movepattern = 0x80;
             break;
 
-	case lvl1_setup2:
-	    runrow = 0x0F;
-	    runpattern = 0x02;
-	    movepattern = 0x80;
-	    break;
+	    case run_setup2:
+	        runrow = 0x0F;
+	        runpattern = 0x02;
+	        movepattern = 0x80;
+	        break;
 
-        case lvl1_start:
+        case run_setup3:
+            if (i < 6) {
+                runrow = 0x0F;
+	            runpattern = 0x04;
+	            movepattern = 0x80;
+            }
+            else {
+                runrow = 0x0F;
+	            runpattern = 0x10;
+	            movepattern = 0x80; 
+            }
+	        break;
+
+        case run_setup4:
+            if (i < 6) {
+                runrow = 0x0F;
+	            runpattern = 0x02;
+	            movepattern = 0x80;
+            }
+            else {
+                runrow = 0x0F;
+	            runpattern = 0x20;
+	            movepattern = 0x80;
+            }
+            break;
+
+        case run_setup5:
+            if (i < 6) {
+                runrow = 0x0F;
+	            runpattern = 0x08;
+	            movepattern = 0x80;
+            }
+            else if (i < 12) {
+                runrow = 0x0F;
+	            runpattern = 0x20;
+	            movepattern = 0x80;
+            }
+            else {
+                runrow = 0x0F;
+                runpattern = 0x04;
+                movepattern = 0x80;
+            }
+            break;
+
+        case run_setup6:
+            if (i < 6) {
+                runrow = 0x0F;
+	            runpattern = 0x10;
+	            movepattern = 0x80;
+            }
+            else if (i < 12) {
+                runrow = 0x0F;
+	            runpattern = 0x08;
+	            movepattern = 0x80;
+            }
+            else {
+                runrow = 0x0F;
+                runpattern = 0x40;
+                movepattern = 0x80;
+            }
+            break;
+
+        case run_setup7:
+            if (i < 6) {
+                runrow = 0x0F;
+	            runpattern = 0x08;
+	            movepattern = 0x80;
+            }
+            else if (i < 12) {
+                runrow = 0x0F;
+	            runpattern = 0x10;
+	            movepattern = 0x80;
+            }
+            else if (i < 18) {
+                runrow = 0x0F;
+                runpattern = 0x20;
+                movepattern = 0x80;
+            }
+            else {
+                runrow = 0x0F;
+                runpattern = 0x02;
+                movepattern = 0x80;
+            }
+            break;
+
+        case run_start:
             moverow = 0x07;
             if (movepattern == 0x01 && (jump || jump2)) {
                 movepattern = 0x80;
-		moverow = 0x01;
+		        moverow = 0x01;
             }
-	    else if (movepattern == 0x01)
+	        else if (movepattern == 0x01)
             {
                 movepattern = 0x80;
             }
             else {
-		if (jump || jump2) {
-			moverow = 0x01;
-		}
-		else {
-			moverow = 0x07;
-		}
-		movepattern >>= 1;
+                if (jump || jump2) {
+                    moverow = 0x01;
+                }
+                else {
+                    moverow = 0x07;
+                }
+                movepattern >>= 1;
             }
             break;
 
-	case lvl1_start2:
-		moverow = 0x07;
-		if (movepattern == 0x01 && (jump || jump2)) {
-			movepattern = 0x80;
-			moverow = 0x01;
-		}
-		else if (movepattern == 0x01) {
-			movepattern = 0x80;
-		}
-		else {
-			if (jump || jump2) {
-				moverow = 0x01;
-			}
-			movepattern >>= 1;
-		}
-		break;
+        case run_start2:
+            moverow = 0x07;
+            if (movepattern == 0x01 && (jump || jump2)) {
+                movepattern = 0x80;
+                moverow = 0x01;
+            }
+            else if (movepattern == 0x01) {
+                movepattern = 0x80;
+            }
+            else {
+                if (jump || jump2) {
+                    moverow = 0x01;
+                }
+                movepattern >>= 1;
+            }
+            break;
 
-	    case lvl1_fail:
+        case run_start3:
+            moverow = 0x07;
+            if (movepattern == 0x01 && (jump || jump2)) {
+                movepattern = 0x80;
+                moverow = 0x01;
+            }
+            else if (movepattern == 0x01) {
+                movepattern = 0x80;
+            }
+            else {
+                if (jump || jump2) {
+                    moverow = 0x01;
+                }
+                movepattern >>= 1;
+            }
+            break;
+        
+        case run_start4:
+            moverow = 0x07;
+            if (movepattern == 0x01 && (jump || jump2)) {
+                movepattern = 0x80;
+                moverow = 0x01;
+            }
+            else if (movepattern == 0x01) {
+                movepattern = 0x80;
+            }
+            else {
+                if (jump || jump2) {
+                    moverow = 0x01;
+                }
+                movepattern >>= 1;
+            }
+            break;
+
+        case run_start5:
+            moverow = 0x07;
+            if (movepattern == 0x01 && (jump || jump2)) {
+                movepattern = 0x80;
+                moverow = 0x01;
+            }
+            else if (movepattern == 0x01) {
+                movepattern = 0x80;
+            }
+            else {
+                if (jump || jump2) {
+                    moverow = 0x01;
+                }
+                movepattern >>= 1;
+            }
+            break;
+        
+        case run_start6:
+            moverow = 0x07;
+            if (movepattern == 0x01 && (jump || jump2)) {
+                movepattern = 0x80;
+                moverow = 0x01;
+            }
+            else if (movepattern == 0x01) {
+                movepattern = 0x80;
+            }
+            else {
+                if (jump || jump2) {
+                    moverow = 0x01;
+                }
+                movepattern >>= 1;
+            }
+            break;
+
+        case run_start7:
+            moverow = 0x07;
+            if (movepattern == 0x01 && (jump || jump2)) {
+                movepattern = 0x80;
+                moverow = 0x01;
+            }
+            else if (movepattern == 0x01) {
+                movepattern = 0x80;
+            }
+            else {
+                if (jump || jump2) {
+                    moverow = 0x01;
+                }
+                movepattern >>= 1;
+            }
+            break;
+
+	    case run_fail:
 	    	movepattern = 0x00;
-		moverow = 0x1F;
-		runpattern = 0x00;
-		runrow = 0x1F;
-		break;
+            moverow = 0x1F;
+            runpattern = 0x00;
+            runrow = 0x1F;
+		    break;
 
-	   case lvl1_win:
-		movepattern = 0x00;
-		moverow = 0x1F;
-		runpattern = 0x00;
-		runrow = 0x1F;
-		break;
+	    case run_win:
+            movepattern = 0x00;
+            moverow = 0x1F;
+            runpattern = 0x00;
+            runrow = 0x1F;
+            break;
 
-	   default:
-		break;
-        }
+	    default:
+		    break;
+    }
 
-        return state;
+    return state;
 }
-
 
 enum lose_states { lose_wait, lose_s1, lose_s2, lose_s3 };
 unsigned char loserow = 0x1F;
@@ -615,9 +966,9 @@ int main(void)
     task1.TickFct = &open_tick;
 
     task2.state = start;
-    task2.period = 400;
+    task2.period = 300;
     task2.elapsedTime = task2.period;
-    task2.TickFct = &lvl1_tick;
+    task2.TickFct = &run_tick;
 
     task3.state = start;
     task3.period = 1;
